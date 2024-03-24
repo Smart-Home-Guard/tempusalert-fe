@@ -1,4 +1,4 @@
-# `/app/lib`
+# `/lib`
 
 All reusable utility functions are stored here.
 

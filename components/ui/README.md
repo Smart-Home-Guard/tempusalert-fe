@@ -1,4 +1,4 @@
-# `/app/ui`
+# `/components/ui`
 
 All reusable components are stored here.
 
