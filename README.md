@@ -1,5 +1,6 @@
 # Smart Home Guard interface
-
+[![lint](https://github.com/Smart-Home-Guard/tempusalert-fe/actions/workflows/lint.yml/badge.svg)](https://github.com/Smart-Home-Guard/tempusalert-fe/actions/workflows/lint.yml)
+[![test](https://github.com/Smart-Home-Guard/tempusalert-fe/actions/workflows/test.yml/badge.svg)](https://github.com/Smart-Home-Guard/tempusalert-fe/actions/workflows/test.yml)
 ## Main contributors
 
 <a href = "https://github.com/Smart-Home-Guard/tempusalert-fe/graphs/contributors">
