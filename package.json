@@ -9,7 +9,7 @@
     "lint": "next lint",
     "test": "true",
     "prepare": "husky",
-    "api:pull": "dotenv -- cross-var openapi-typescript %OPEN_API_SPEC_URL% -o ./app/types/openapi-spec.ts"
+    "api:pull": "dotenv -- cross-var openapi-typescript %OPEN_API_SPEC_URL% -o ./types/openapi-spec.ts"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.0",
