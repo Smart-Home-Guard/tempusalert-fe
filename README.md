@@ -18,4 +18,5 @@ Following a typical Next.js + shadcn/ui project:
 
 ## Styleguide
 
+### Color, Font size, Spacing
 [Figma - Tempusalert styleguide](https://www.figma.com/file/x1VaDX8ipXmqTTM7WSKa5z/Tempusalert-Styleguide?type=design&node-id=0%3A1&mode=design&t=jfjwHIwjFU5fU651-1)
