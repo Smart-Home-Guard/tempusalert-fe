@@ -43,9 +43,37 @@
     --danger-dark: #871919;
     --danger-very-dark: #5F1414;
     
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --text-12: 12px;
+    --text-14: 14px;
+    --text-16: 16px;
+    --text-18: 18px;
+    --text-20: 20px;
+    --text-24: 24px;
+    --text-30: 30px;
+    --text-36: 36px;
+    --text-48: 48px;
+    --text-60: 60px;
+    --text-72: 72px;
+
+    --space-4: 4px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-48: 48px;
+    --space-64: 64px;
+    --space-96: 96px;
+    --space-128: 128px;
+    --space-192: 192px;
+    --space-384: 384px;
+    --space-512: 512px;
+    --space-640: 640px;
+    --space-768: 768px;
+
+    --border: var(--neutral-dark);
+    --input: var(--neutral-very-light);
+    --ring: var(--neutral-dark);
 
     --radius: 0.5rem;
   }
