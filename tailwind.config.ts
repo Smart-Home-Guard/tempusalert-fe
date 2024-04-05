@@ -39,6 +39,7 @@ const config = {
       "72": ["var(--text-72)", "var(--small-line-height)"],
     },
     margin: {
+      "auto": "auto",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",
@@ -73,6 +74,7 @@ const config = {
       "768": "var(--space-768)",
     },
     width: {
+      "full": "100%",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",
@@ -90,6 +92,7 @@ const config = {
       "768": "var(--space-768)",
     },
     height: {
+      "full": "100%",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",
