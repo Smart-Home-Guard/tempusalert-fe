@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 
 export default function Root() {
-  if (cookies().get('isLoggedIn')) {
+  if (headers().get('isLoggedIn')) {
     redirect('/home');
   } else {
     redirect('/login');
