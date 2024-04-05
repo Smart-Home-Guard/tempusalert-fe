@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.string()
@@ -84,6 +85,7 @@ export default function LoginPage() {
               )}
             />
             <Button variant="confirm" size="lg" className="w-full" type="submit">Login</Button>
+            <Link href="/signup" className="text-center pt-12 block text-neutral-dark">No account? Signup</Link>
           </form>
         </Form>
       </CardContent>
