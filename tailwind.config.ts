@@ -39,6 +39,7 @@ const config = {
       "72": ["var(--text-72)", "var(--small-line-height)"],
     },
     margin: {
+      "auto": "auto",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",
