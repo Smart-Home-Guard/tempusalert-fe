@@ -16,7 +16,7 @@ const buttonVariants = cva(
           "border border-input bg-neutral-very-light hover:bg-safe hover:text-safe-very-light",
         secondary:
           "bg-neutral text-neutral-very-light hover:bg-neutral/80",
-        confirm: "bg-safe-dark text-neutral-light hover:bg-safe-dark/90",
+        confirm: "bg-primary-dark text-neutral-light hover:bg-primary-dark/90",
         ghost: "hover:bg-safe hover:text-safe-very-light",
         link: "text-primary underline-offset-4 hover:underline",
       },
