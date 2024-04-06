@@ -3,9 +3,11 @@
 import { redirect } from 'next/navigation';
 
 export default function Root() {
-  if (localStorage.getItem('loggedin')) {
-    redirect('/home');
-  } else {
-    redirect('/login');
+  if (typeof window !== "undefined") {
+    if (localStorage.getItem('loggedin')) {
+      redirect('/home');
+    } else {
+      redirect('/login');
+    }
   }
 }

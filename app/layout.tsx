@@ -2,8 +2,10 @@ import { Inter as FontSans } from "next/font/google";
 import { Metadata } from "next";
 
 import "@/styles/globals.css";
-import { cn } from "@/lib/utils";
+import { cn, urlBase64ToUint8Array } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
+import { useEffect } from "react";
+import { apiClient } from "@/lib/apiClient";
 
 export const metadata: Metadata = {
   title: "Tempusalert",
@@ -16,6 +18,20 @@ const fontSans = FontSans({
 });
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      apiClient.GET("/api/push-credential/public-key")
+        .then(({ data: applicationServerKey }) =>
+          navigator.serviceWorker
+            .register("/push-notification-listener.js")
+            .then((registration) => registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(applicationServerKey!),
+        })))
+    }
+  }, []);
+
+
   return (
     <html lang="en">
       <head />
