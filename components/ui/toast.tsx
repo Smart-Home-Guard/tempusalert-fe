@@ -16,7 +16,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
+      "fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-16 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]",
       className
     )}
     {...props}
@@ -25,13 +25,15 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-16 overflow-hidden rounded-md border p-24 pr-32 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
   {
     variants: {
       variant: {
         default: "border bg-neutral-very-light neutral-very-dark",
         destructive:
-          "danger group border-danger-very-dark bg-danger-light text-danger-dark",
+          "danger group border-danger-dark bg-danger-dark text-neutral-very-light",
+        safe:
+          "safe group border-safe-dark bg-safe-dark text-neutral-very-light",
       },
     },
     defaultVariants: {
@@ -62,7 +64,7 @@ const ToastAction = React.forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-12 text-14px font-medium ring-offset-background transition-colors hover:bg-neutral-very-light focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.danger]:border-neutral-dark/40 group-[.danger]:hover:border-danger/30 group-[.danger]:hover:bg-danger group-[.danger]:hover:text-danger-very-dark group-[.danger]:focus:ring-danger",
+      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-8 text-14 font-medium ring-offset-background transition-colors hover:bg-neutral-very-light focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.danger]:border-neutral-dark/40 group-[.danger]:hover:border-danger/30 group-[.danger]:hover:bg-danger group-[.danger]:hover:text-danger-very-dark group-[.danger]:focus:ring-danger",
       className
     )}
     {...props}
@@ -77,7 +79,7 @@ const ToastClose = React.forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-neutral-dark/50 opacity-0 transition-opacity hover:text-neutral-very-dark focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.danger]:text-danger-light group-[.danger]:hover:text-danger-very-light group-[.danger]:focus:ring-danger-slightly-light group-[.danger]:focus:ring-offset-danger",
+      "absolute right-2 top-2 rounded-md p-4 text-neutral-dark/50 opacity-0 transition-opacity hover:text-neutral-very-dark focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.danger]:text-danger-light group-[.danger]:hover:text-danger-very-light group-[.danger]:focus:ring-danger-slightly-light group-[.danger]:focus:ring-offset-danger",
       className
     )}
     toast-close=""
