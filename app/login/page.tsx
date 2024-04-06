@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -33,6 +33,8 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
+  // redirect can not be called asynchronously without being wrapped in startTransition
+  const [, startTransition] = useTransition();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -55,7 +57,7 @@ export default function LoginPage() {
       localStorage.setItem("loggedin", "true");
       setIsLoggedInFailed(false);
       setLogInErrorMessage("");
-      redirect('/home');
+      startTransition(() => redirect("/home"));
     }
     return false;
   }
