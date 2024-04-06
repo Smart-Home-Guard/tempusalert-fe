@@ -1,5 +1,6 @@
 "use client"
 
+import { redirect } from "next/navigation";
 import Image from "next/image";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +19,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { apiClient } from "@/lib/apiClient";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useState, useTransition } from "react";
+import { useToast } from "@/components/ui/use-toast"
 
 const formSchema = z.object({
   email: z.string()
@@ -29,6 +35,10 @@ const formSchema = z.object({
 }).refine(({ password, confirmPassword }) => confirmPassword === password, { message: "Mismatched passwords", path: ["confirmPassword"] });
 
 export default function SignupPage() {
+  // redirect needs to be wrapped inside startTransition to be able to be called in setTimeout
+  const [, startTransition] = useTransition();
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -38,9 +48,28 @@ export default function SignupPage() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Handle signup request
-    console.log(values)
+  const [isRegisteredFailed, setIsRegisteredFailed] = useState(false);
+  const [registerErrorMessage, setRegisterErrorMessage] = useState("");
+
+  async function onSubmit(credentials: z.infer<typeof formSchema>) {
+    const response = await apiClient.POST("/auth/register/", { body: { email: credentials.email, password: credentials.password } });
+    if (response.error) {
+      form.setValue("password", "", { shouldDirty: true });
+      form.setValue("confirmPassword", "", { shouldDirty: true });
+      form.setValue("email", "", { shouldDirty: true });
+      setIsRegisteredFailed(true);
+      setRegisterErrorMessage(response.error.message);
+    } else {
+      setIsRegisteredFailed(false);
+      setRegisterErrorMessage("");
+      toast({
+        title: "Register successfully",
+        description: "Redirecting to login page...",
+        variant: "safe",
+      });
+      setTimeout(() => startTransition(() => redirect("/login")), 2000);
+    }
+    return false;
   }
 
   return <div className="flex flex-row min-h-screen justify-center items-center">
@@ -57,7 +86,17 @@ export default function SignupPage() {
           <span className="text-primary-slightly-dark">Signup</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="py-14">
+      <CardContent className="py-16">
+        {
+          isRegisteredFailed &&
+          <Alert className="bg-danger-very-light" variant="danger">
+            <AlertCircle className="h-24 w-16"/>
+            <AlertTitle>Register Failed</AlertTitle>
+            <AlertDescription>
+              {registerErrorMessage}
+            </AlertDescription>
+          </Alert>
+        }
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField

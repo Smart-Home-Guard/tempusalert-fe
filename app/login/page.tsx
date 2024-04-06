@@ -1,5 +1,6 @@
 "use client"
 
+import { redirect } from "next/navigation";
 import Image from "next/image";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +19,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
+import { apiClient } from "@/lib/apiClient";
+import { useState } from "react";
+import { AlertCircle } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const formSchema = z.object({
   email: z.string()
@@ -34,11 +39,24 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
-  })
+  });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: Handle login request
-    console.log(values)
+  const [isLoggedInFailed, setIsLoggedInFailed] = useState(false);
+  const [logInErrorMessage, setLogInErrorMessage] = useState("");
+
+  async function onSubmit(credentials: z.infer<typeof formSchema>) {
+    const response = await apiClient.POST("/auth/web/", { body: credentials });
+    if (response.error) {
+      form.setValue('password', '', { shouldDirty: true });
+      setIsLoggedInFailed(true);
+      setLogInErrorMessage(response.error.message);
+    } else {
+      localStorage.setItem("jwt", (response.data.token as any).Some);
+      setIsLoggedInFailed(false);
+      setLogInErrorMessage("");
+      redirect('/home');
+    }
+    return false;
   }
 
   return <div className="flex flex-row min-h-screen justify-center items-center">
@@ -55,7 +73,17 @@ export default function LoginPage() {
           <span className="text-primary-slightly-dark">Login</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="py-14">
+      <CardContent className="py-16">
+        {
+          isLoggedInFailed &&
+          <Alert className="bg-danger-very-light" variant="danger">
+            <AlertCircle className="h-24 w-16"/>
+            <AlertTitle>Login Failed</AlertTitle>
+            <AlertDescription>
+              {logInErrorMessage}
+            </AlertDescription>
+          </Alert>
+        }
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
