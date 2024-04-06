@@ -52,6 +52,7 @@ export default function LoginPage() {
       setLogInErrorMessage(response.error.message);
     } else {
       localStorage.setItem("jwt", (response.data.token as any).Some);
+      localStorage.setItem("loggedin", "true");
       setIsLoggedInFailed(false);
       setLogInErrorMessage("");
       redirect('/home');
