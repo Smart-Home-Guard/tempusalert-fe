@@ -23,6 +23,7 @@ import { apiClient } from "@/lib/apiClient";
 import { useState, useTransition } from "react";
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useLocalStorage } from "usehooks-ts";
 
 const formSchema = z.object({
   email: z.string()
@@ -33,6 +34,10 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
+  const [, setJwt, removeJwt] = useLocalStorage("jwt", undefined);
+  const [, setEmail, removeEmail] = useLocalStorage("email", "");
+  const [, setLoggedIn, removeLoggedIn] = useLocalStorage("loggedIn", false);
+
   // redirect can not be called asynchronously without being wrapped in startTransition
   const [, startTransition] = useTransition();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,12 +54,16 @@ export default function LoginPage() {
   async function onSubmit(credentials: z.infer<typeof formSchema>) {
     const response = await apiClient.POST("/auth/web/", { body: credentials });
     if (response.error) {
+      removeJwt();
+      removeEmail();
+      removeLoggedIn();
       form.setValue('password', '', { shouldDirty: true });
       setIsLoggedInFailed(true);
       setLogInErrorMessage(response.error.message);
     } else {
-      localStorage.setItem("jwt", (response.data.token as any).Some);
-      localStorage.setItem("loggedin", "true");
+      setJwt((response.data.token as any).Some);
+      setLoggedIn(true);
+      setEmail(credentials.email);
       setIsLoggedInFailed(false);
       setLogInErrorMessage("");
       startTransition(() => redirect("/home"));
