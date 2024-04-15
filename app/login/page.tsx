@@ -37,6 +37,7 @@ export default function LoginPage() {
   const [, setJwt, removeJwt] = useLocalStorage("jwt", undefined);
   const [, setEmail, removeEmail] = useLocalStorage("email", "");
   const [, setLoggedIn, removeLoggedIn] = useLocalStorage("loggedIn", false);
+  const [, , removeNotificationPushed] = useLocalStorage("notificationPushed", false);
 
   // redirect can not be called asynchronously without being wrapped in startTransition
   const [, startTransition] = useTransition();
@@ -57,6 +58,7 @@ export default function LoginPage() {
       removeJwt();
       removeEmail();
       removeLoggedIn();
+      removeNotificationPushed();
       form.setValue('password', '', { shouldDirty: true });
       setIsLoggedInFailed(true);
       setLogInErrorMessage(response.error.message);

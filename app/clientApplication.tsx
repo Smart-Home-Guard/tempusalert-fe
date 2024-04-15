@@ -10,6 +10,7 @@ export default function ClientApplication({ children }: PropsWithChildren<{}>) {
     const { toast } = useToast();
     const [email] = useLocalStorage("email", "");
     const [jwt] = useLocalStorage("jwt", "");
+    const [notificationPushed, setNotificationPushed] = useLocalStorage("notificationPushed", false);
 
     async function pushNotificationRegister() {
         const permission = await window.Notification.requestPermission();
@@ -43,6 +44,7 @@ export default function ClientApplication({ children }: PropsWithChildren<{}>) {
                     description: data.message,
                     variant: "safe",
                 });
+                setNotificationPushed(true);
             } else {
                 toast({
                     title: "Failed push subscription",
@@ -54,10 +56,10 @@ export default function ClientApplication({ children }: PropsWithChildren<{}>) {
     }
 
     useEffect(() => {
-        if (email) {
+        if (email && !notificationPushed) {
             pushNotificationRegister();
         }
-    }, [email]);
+    }, [email, notificationPushed]);
 
     return <> { children } </>
 }
