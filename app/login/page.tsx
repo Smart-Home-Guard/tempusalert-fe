@@ -36,8 +36,12 @@ const formSchema = z.object({
 export default function LoginPage() {
   const [, setJwt, removeJwt] = useLocalStorage("jwt", undefined);
   const [, setEmail, removeEmail] = useLocalStorage("email", "");
-  const [, setLoggedIn, removeLoggedIn] = useLocalStorage("loggedIn", false);
+  const [isLoggedIn, setLoggedIn, removeLoggedIn] = useLocalStorage("loggedIn", false);
   const [, , removeNotificationPushed] = useLocalStorage("notificationPushed", false);
+
+  if (isLoggedIn) {
+    redirect("/home");
+  }
 
   // redirect can not be called asynchronously without being wrapped in startTransition
   const [, startTransition] = useTransition();
