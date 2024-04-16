@@ -44,7 +44,7 @@ export function AvatarPane({ className = "" }: { className?: string }) {
             <DropdownMenu>
                 <DropdownMenuTrigger>
                     <Avatar className="bg-warning-dark text-neutral-very-light">
-                        <AvatarFallback>{ email[0].toUpperCase() }</AvatarFallback>
+                        <AvatarFallback>{ email[0]?.toUpperCase() }</AvatarFallback>
                     </Avatar>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
