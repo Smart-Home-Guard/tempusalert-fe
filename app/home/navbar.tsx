@@ -6,6 +6,8 @@ import Link from "next/link";
 import { FlameIcon, HomeIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useLocalStorage } from "usehooks-ts";
 
 export function NavigationTab({ title, url, icon }: { title: string, url: string, icon: ReactNode }) {
     const currentUrl = usePathname();
@@ -25,9 +27,30 @@ export function NavigationTab({ title, url, icon }: { title: string, url: string
     )
 }
 
+export function NavigationPane({ className }: { className: string }) {
+    return (
+        <div className={"flex flex-col mt-14 overflow-y-auto" + " " + className}>
+            <NavigationTab title="Home" url="/home" icon={<HomeIcon/>} />
+            <NavigationTab title="Fire alert" url="/home/fire-alert" icon={<FlameIcon/>} />
+        </div>
+    )
+}
+
+export function AvatarPane({ className }: { className: string }) {
+    const [email] = useLocalStorage("email", "");
+    return (
+        <div className={"flex gap-2 items-center mx-8 px-16 py-16" + " " + className }>
+            <Avatar className="bg-warning-dark text-neutral-very-light">
+                <AvatarFallback>{ email[0].toUpperCase() }</AvatarFallback>
+            </Avatar>
+            <p className="overflow-clip">{ email }</p>
+        </div>
+    )
+}
+
 export function NavigationBar() {
     return (
-        <nav className="min-h-screen bg-primary-slightly-dark text-neutral-very-light w-250 shadow-xl shadow-primary-slightly-light">
+        <nav className="min-h-screen bg-primary-slightly-dark text-neutral-very-light w-250 shadow-xl shadow-primary-slightly-light fixed">
             <div className="bg-primary p-16 shadow-md">
                 <Link href="/home" className="flex gap-2 justify-start text-2 items-center">
                     <Image
@@ -40,12 +63,9 @@ export function NavigationBar() {
                     <p className="text-18 font-bold">Tempusalert</p>
                 </Link>
             </div>
-            <div className="flex flex-col mt-32">
-                <NavigationTab title="Home" url="/home" icon={<HomeIcon/>} />
-                <NavigationTab title="Fire alert" url="/home/fire-alert" icon={<FlameIcon/>} />
-            </div>
-            <div>
-
+            <div className="flex flex-col h-full">
+                <AvatarPane/>
+                <NavigationPane/>
             </div>
         </nav>
     )
