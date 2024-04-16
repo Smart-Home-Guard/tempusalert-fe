@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { urlBase64ToUint8Array } from "@/lib/utils";
 import { useEffect } from "react";
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 
 export default function ClientApplication({ children }: PropsWithChildren<{}>) {
     const { toast } = useToast();

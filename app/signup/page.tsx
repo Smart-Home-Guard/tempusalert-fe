@@ -24,7 +24,7 @@ import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useState, useTransition } from "react";
 import { useToast } from "@/components/ui/use-toast"
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 
 const formSchema = z.object({
   email: z.string()

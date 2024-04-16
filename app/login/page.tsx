@@ -23,7 +23,7 @@ import { apiClient } from "@/lib/apiClient";
 import { useState, useTransition } from "react";
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 
 const formSchema = z.object({
   email: z.string()
