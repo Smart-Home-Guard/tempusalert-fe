@@ -179,7 +179,7 @@ const DropdownMenuSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DropdownMenuPrimitive.Separator
     ref={ref}
-    className={cn("bg-neutral-dark", className)}
+    className={cn("bg-neutral h-[0.5px]", className)}
     {...props}
   />
 ))
