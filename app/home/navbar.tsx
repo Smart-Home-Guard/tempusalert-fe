@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FlameIcon, HomeIcon } from "lucide-react";
-import { ReactNode } from "react";
-import { usePathname } from "next/navigation";
+import { ReactNode, useTransition } from "react";
+import { redirect, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -38,7 +38,10 @@ export function NavigationPane({ className = "" }: { className?: string }) {
 }
 
 export function AvatarPane({ className = "" }: { className?: string }) {
-    const [email] = useLocalStorage("email", "");
+    const [email, , removeEmail] = useLocalStorage("email", "");
+    const [, , removeJwt] = useLocalStorage("jwt", "");
+    const [, , removeLoggedIn] = useLocalStorage("loggedIn", true);
+    const [, startTransition] = useTransition();
 
     return (
         <div className={"flex gap-2 items-center mx-8 px-16 py-16" + " " + className}>
@@ -52,6 +55,8 @@ export function AvatarPane({ className = "" }: { className?: string }) {
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>Profile</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="danger" onClick={() => { removeEmail(); removeJwt(); removeLoggedIn(); startTransition(() => redirect("/")); }}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             <p className="overflow-clip drop-shadow-md">{ email }</p>
