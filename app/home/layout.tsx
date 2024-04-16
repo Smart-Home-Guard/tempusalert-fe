@@ -12,6 +12,10 @@ export default function HomeLayout({ children }: RootLayoutProps) {
   const [, startTransition] = useTransition();
 
   useEffect(() => {
+    if (loggedIn === undefined) {
+      return;
+    }
+
     if (!loggedIn) {
       startTransition(() => redirect('/login'));
     }
