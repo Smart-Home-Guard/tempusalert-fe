@@ -94,19 +94,26 @@ DropdownMenuContent.displayName = DropdownMenuPrimitive.Content.displayName
 const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
-    inset?: boolean
+    inset?: boolean, variant?: "default" | "danger"
   }
->(({ className, inset, ...props }, ref) => (
+>(({ className, inset, variant, ...props }, ref) => {
+  const styling = {
+    default: "relative flex cursor-default select-none items-center rounded-sm px-8 py-4 text-16 outline-none transition-colors focus:bg-primary-slightly-light focus:text-neutral-very-light data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+    danger: "relative flex cursor-default select-none items-center rounded-sm px-8 py-4 text-16 outline-none transition-colors focus:bg-danger text-danger-slightly-dark focus:text-neutral-very-light data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+  }[variant || "default"]
+
+  return (
   <DropdownMenuPrimitive.Item
-    ref={ref}
-    className={cn(
-      "relative flex cursor-default select-none items-center rounded-sm px-8 py-4 text-12 outline-none transition-colors focus:bg-primary-slightly-light focus:text-neutral-very-light data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      inset && "pl-8",
-      className
-    )}
-    {...props}
-  />
-))
+      ref={ref}
+      className={cn(
+        styling,
+        inset && "pl-8",
+        className
+      )}
+      {...props}
+    />
+  )
+})
 DropdownMenuItem.displayName = DropdownMenuPrimitive.Item.displayName
 
 const DropdownMenuCheckboxItem = React.forwardRef<
