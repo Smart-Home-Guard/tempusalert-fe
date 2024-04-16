@@ -9,7 +9,11 @@ import { cn } from "@/lib/utils"
 const DropdownMenu = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>
->(({ children, ...props }, ref) => (<DropdownMenuPrimitive.Root/>))
+>(({ children, ...props }, ref) => (
+  <DropdownMenuPrimitive.Root {...props}>
+    { children }
+  </DropdownMenuPrimitive.Root>
+))
 DropdownMenu.displayName =
   DropdownMenuPrimitive.Root.displayName
 
