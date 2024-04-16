@@ -5,7 +5,7 @@ import { useLocalStorage } from '@/lib/useLocalStorage';
 import { useEffect, useTransition } from 'react';
 
 export default function Root() {
-  const [loggedIn] = useLocalStorage<undefined | boolean>("loggedIn", undefined);
+  const [loggedIn] = useLocalStorage("loggedIn", true);
   const [, startTransition] = useTransition();
   useEffect(() => {
     if (loggedIn) {

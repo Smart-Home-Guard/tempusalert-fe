@@ -8,14 +8,10 @@ import { redirect } from "next/navigation";
 import { useEffect, useTransition } from "react";
 
 export default function HomeLayout({ children }: RootLayoutProps) {
-  const [loggedIn] = useLocalStorage<undefined | boolean>("loggedIn", undefined);
+  const [loggedIn, setLoggedIn] = useLocalStorage("loggedIn", true);
   const [, startTransition] = useTransition();
 
   useEffect(() => {
-    if (loggedIn === undefined) {
-      return;
-    }
-
     if (!loggedIn) {
       startTransition(() => redirect('/login'));
     }
@@ -23,7 +19,7 @@ export default function HomeLayout({ children }: RootLayoutProps) {
 
   return (
       <div className="flex min-h-screen bg-neutral-light">
-        <NavigationBar />
+        <NavigationBar loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>
         <div>{ children }</div>
       </div>
   )

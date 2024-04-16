@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FlameIcon, HomeIcon } from "lucide-react";
-import { ReactNode, useTransition } from "react";
+import { Dispatch, ReactNode, SetStateAction, useTransition } from "react";
 import { redirect, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useLocalStorage } from "@/lib/useLocalStorage";
@@ -37,10 +37,9 @@ export function NavigationPane({ className = "" }: { className?: string }) {
     )
 }
 
-export function AvatarPane({ className = "" }: { className?: string }) {
+export function AvatarPane({ className = "", setLoggedIn }: { className?: string, setLoggedIn: Dispatch<SetStateAction<boolean>> }) {
     const [email, , removeEmail] = useLocalStorage("email", "");
     const [, , removeJwt] = useLocalStorage("jwt", "");
-    const [, , removeLoggedIn] = useLocalStorage("loggedIn", true);
     const [, startTransition] = useTransition();
 
     return (
@@ -56,7 +55,7 @@ export function AvatarPane({ className = "" }: { className?: string }) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>Profile</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="danger" onClick={() => { removeEmail(); removeJwt(); removeLoggedIn(); startTransition(() => redirect("/")); }}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem variant="danger" onClick={() => { removeEmail(); removeJwt(); setLoggedIn(false); startTransition(() => redirect("/")); }}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             <p className="overflow-clip drop-shadow-md">{ email }</p>
@@ -64,7 +63,7 @@ export function AvatarPane({ className = "" }: { className?: string }) {
     )
 }
 
-export function NavigationBar() {
+export function NavigationBar({ loggedIn, setLoggedIn }: { loggedIn: boolean, setLoggedIn: Dispatch<SetStateAction<boolean>> }) {
     return (
         <nav className="min-h-screen bg-primary-slightly-dark text-neutral-very-light w-250 shadow-xl shadow-primary-slightly-light fixed">
             <div className="bg-primary p-16 shadow-md">
@@ -80,7 +79,7 @@ export function NavigationBar() {
                 </Link>
             </div>
             <div className="flex flex-col h-full">
-                <AvatarPane/>
+                <AvatarPane setLoggedIn={setLoggedIn} />
                 <NavigationPane/>
             </div>
         </nav>
