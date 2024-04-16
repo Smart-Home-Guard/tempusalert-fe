@@ -82,3 +82,7 @@
     --small-line-height: 1;
   }
 }
+
+*:focus-visible {
+  outline-width: 0px;
+}
