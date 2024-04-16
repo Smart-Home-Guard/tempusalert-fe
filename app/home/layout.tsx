@@ -7,7 +7,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { redirect } from "next/navigation";
 
 export default function HomeLayout({ children }: RootLayoutProps) {
-  const [loggedIn] = useLocalStorage("loggedIn", false);
+  const [loggedIn] = useLocalStorage("loggedIn", true);
 
   if (!loggedIn) {
     redirect('/login');
