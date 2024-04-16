@@ -3,7 +3,7 @@
 import "@/styles/globals.css";
 
 import { NavigationBar } from "./navbar";
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 import { redirect } from "next/navigation";
 
 export default function HomeLayout({ children }: RootLayoutProps) {

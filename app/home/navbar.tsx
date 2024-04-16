@@ -7,7 +7,7 @@ import { FlameIcon, HomeIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorage } from "@/lib/useLocalStorage";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export function NavigationTab({ title, url, icon }: { title: string, url: string, icon: ReactNode }) {
@@ -39,6 +39,7 @@ export function NavigationPane({ className = "" }: { className?: string }) {
 
 export function AvatarPane({ className = "" }: { className?: string }) {
     const [email] = useLocalStorage("email", "");
+
     return (
         <div className={"flex gap-2 items-center mx-8 px-16 py-16" + " " + className}>
             <DropdownMenu>
