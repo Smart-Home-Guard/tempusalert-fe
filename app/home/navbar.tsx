@@ -44,7 +44,7 @@ export function AvatarPane({ className = "" }: { className?: string }) {
         <div className={"flex gap-2 items-center mx-8 px-16 py-16" + " " + className}>
             <DropdownMenu>
                 <DropdownMenuTrigger>
-                    <Avatar className="bg-warning-dark text-neutral-very-light">
+                    <Avatar className="bg-warning-dark text-neutral-very-light drop-shadow-md">
                         <AvatarFallback>{ email[0]?.toUpperCase() }</AvatarFallback>
                     </Avatar>
                 </DropdownMenuTrigger>
@@ -54,7 +54,7 @@ export function AvatarPane({ className = "" }: { className?: string }) {
                     <DropdownMenuItem>Profile</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <p className="overflow-clip">{ email }</p>
+            <p className="overflow-clip drop-shadow-md">{ email }</p>
         </div>
     )
 }
