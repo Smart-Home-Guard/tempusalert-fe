@@ -23,7 +23,7 @@ import { apiClient } from "@/lib/apiClient";
 import { useState, useTransition } from "react";
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useLocalStorage } from "@/lib/useLocalStorage";
+import { useEmailStore, useJwtStore, useLoggedInStore, useNotificationPushedStore } from "@/store";
 
 const formSchema = z.object({
   email: z.string()
@@ -34,12 +34,12 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-  const [, setJwt, removeJwt] = useLocalStorage("jwt", undefined);
-  const [, setEmail, removeEmail] = useLocalStorage("email", "");
-  const [isLoggedIn, setLoggedIn, removeLoggedIn] = useLocalStorage("loggedIn", false);
-  const [, , removeNotificationPushed] = useLocalStorage("notificationPushed", false);
+  const { setJwt, removeJwt } = useJwtStore();
+  const { setEmail, removeEmail } = useEmailStore();
+  const { loggedIn, setLoggedIn, removeLoggedIn } = useLoggedInStore();
+  const { removeNotificationPushed } = useNotificationPushedStore();
 
-  if (isLoggedIn) {
+  if (loggedIn) {
     redirect("/home");
   }
 

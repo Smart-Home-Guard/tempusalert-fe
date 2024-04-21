@@ -7,8 +7,8 @@ import { FlameIcon, HomeIcon } from "lucide-react";
 import { Dispatch, ReactNode, SetStateAction, useTransition } from "react";
 import { redirect, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useLocalStorage } from "@/lib/useLocalStorage";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useEmailStore, useJwtStore, useLoggedInStore } from "@/store";
 
 export function NavigationTab({ title, url, icon }: { title: string, url: string, icon: ReactNode }) {
     const currentUrl = usePathname();
@@ -37,9 +37,10 @@ export function NavigationPane({ className = "" }: { className?: string }) {
     )
 }
 
-export function AvatarPane({ className = "", setLoggedIn }: { className?: string, setLoggedIn: Dispatch<SetStateAction<boolean>> }) {
-    const [email, , removeEmail] = useLocalStorage("email", "");
-    const [, , removeJwt] = useLocalStorage("jwt", "");
+export function AvatarPane({ className = "" }: { className?: string }) {
+    const { email, removeEmail } = useEmailStore();
+    const { removeJwt } = useJwtStore();
+    const { setLoggedIn } = useLoggedInStore();
     const [, startTransition] = useTransition();
 
     return (
@@ -63,7 +64,7 @@ export function AvatarPane({ className = "", setLoggedIn }: { className?: string
     )
 }
 
-export function NavigationBar({ loggedIn, setLoggedIn }: { loggedIn: boolean, setLoggedIn: Dispatch<SetStateAction<boolean>> }) {
+export function NavigationBar() {
     return (
         <nav className="min-h-screen bg-primary-slightly-dark text-neutral-very-light w-250 shadow-xl shadow-primary-slightly-light fixed">
             <div className="bg-primary p-16 shadow-md">
@@ -79,7 +80,7 @@ export function NavigationBar({ loggedIn, setLoggedIn }: { loggedIn: boolean, se
                 </Link>
             </div>
             <div className="flex flex-col h-full">
-                <AvatarPane setLoggedIn={setLoggedIn} />
+                <AvatarPane/>
                 <NavigationPane/>
             </div>
         </nav>

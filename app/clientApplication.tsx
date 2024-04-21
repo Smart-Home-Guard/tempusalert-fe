@@ -3,14 +3,16 @@
 import { useToast } from "@/components/ui/use-toast";
 import { apiClient } from "@/lib/apiClient";
 import { urlBase64ToUint8Array } from "@/lib/utils";
+import { useEmailStore, useInitStores, useJwtStore, useNotificationPushedStore } from "@/store";
 import { useEffect } from "react";
-import { useLocalStorage } from "@/lib/useLocalStorage";
 
 export default function ClientApplication({ children }: PropsWithChildren<{}>) {
+    useInitStores();
+
     const { toast } = useToast();
-    const [email] = useLocalStorage("email", "");
-    const [jwt] = useLocalStorage("jwt", "");
-    const [notificationPushed, setNotificationPushed] = useLocalStorage("notificationPushed", false);
+    const { email } = useEmailStore();
+    const { jwt } = useJwtStore();
+    const { notificationPushed, setNotificationPushed } = useNotificationPushedStore();
 
     async function pushNotificationRegister() {
         const permission = await window.Notification.requestPermission();

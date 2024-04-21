@@ -1,11 +1,11 @@
 "use client"
 
+import { useLoggedInStore } from '@/store';
 import { redirect } from 'next/navigation';
-import { useLocalStorage } from '@/lib/useLocalStorage';
 import { useEffect, useTransition } from 'react';
 
 export default function Root() {
-  const [loggedIn] = useLocalStorage("loggedIn", true);
+  const { loggedIn } = useLoggedInStore();
   const [, startTransition] = useTransition();
   useEffect(() => {
     if (loggedIn) {
