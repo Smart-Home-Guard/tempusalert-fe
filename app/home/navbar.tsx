@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { FlameIcon, HomeIcon } from "lucide-react";
-import { Dispatch, ReactNode, SetStateAction, useTransition } from "react";
+import { ReactNode, useTransition } from "react";
 import { redirect, usePathname } from "next/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
