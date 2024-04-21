@@ -22,7 +22,7 @@ import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useToast } from "@/components/ui/use-toast"
 import { useLoggedInStore } from "@/store";
 
@@ -36,12 +36,16 @@ const formSchema = z.object({
 }).refine(({ password, confirmPassword }) => confirmPassword === password, { message: "Mismatched passwords", path: ["confirmPassword"] });
 
 export default function SignupPage() {
-  const { loggedIn } = useLoggedInStore();
-  if (loggedIn) {
-    redirect("/home");
-  }
+  const { ready, loggedIn } = useLoggedInStore();
   // redirect needs to be wrapped inside startTransition to be able to be called in setTimeout
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (ready && loggedIn) {
+      startTransition(() => redirect("/home"));
+    }
+  }, [ready, loggedIn]);
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({

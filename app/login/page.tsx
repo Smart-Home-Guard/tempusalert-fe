@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { apiClient } from "@/lib/apiClient";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { AlertCircle } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useEmailStore, useJwtStore, useLoggedInStore, useNotificationPushedStore } from "@/store";
@@ -36,15 +36,17 @@ const formSchema = z.object({
 export default function LoginPage() {
   const { setJwt, removeJwt } = useJwtStore();
   const { setEmail, removeEmail } = useEmailStore();
-  const { loggedIn, setLoggedIn, removeLoggedIn } = useLoggedInStore();
+  const { ready, loggedIn, setLoggedIn, removeLoggedIn } = useLoggedInStore();
   const { removeNotificationPushed } = useNotificationPushedStore();
+  const [, startTransition] = useTransition();
 
-  if (loggedIn) {
-    redirect("/home");
-  }
+  useEffect(() => {
+    if (ready && loggedIn) {
+      startTransition(() => redirect("/home"));
+    }
+  }, [ready, loggedIn])
 
   // redirect can not be called asynchronously without being wrapped in startTransition
-  const [, startTransition] = useTransition();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
