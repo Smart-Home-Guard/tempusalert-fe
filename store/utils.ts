@@ -6,7 +6,7 @@ export function createGlobalStore<T, K extends string>(key: K, initialValue: T):
     return create((set: any) => {
         const keyCapitalize = key.charAt(0).toUpperCase() + key.slice(1);
         return {
-            ready: false,
+            "ready": false,
             [`${key}`]: initialValue,
             [`set${keyCapitalize}`]: (newValue: T) => set(() => ({ [`${key}`]: newValue })),
             [`remove${keyCapitalize}`]: () => set(() => ({ [`${key}`]: initialValue })),
