@@ -44,7 +44,7 @@ export default function LoginPage() {
     if (ready && loggedIn) {
       startTransition(() => redirect("/home"));
     }
-  }, [ready, loggedIn])
+  }, [loggedIn])
 
   // redirect can not be called asynchronously without being wrapped in startTransition
   const form = useForm<z.infer<typeof formSchema>>({

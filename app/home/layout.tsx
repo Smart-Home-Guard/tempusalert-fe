@@ -15,7 +15,7 @@ export default function HomeLayout({ children }: RootLayoutProps) {
     if (ready && !loggedIn) {
       startTransition(() => redirect('/login'));
     }
-  }, [ready, loggedIn])
+  }, [loggedIn])
 
   return (
       <div className="flex min-h-screen bg-neutral-light">

@@ -44,7 +44,7 @@ export default function SignupPage() {
     if (ready && loggedIn) {
       startTransition(() => redirect("/home"));
     }
-  }, [ready, loggedIn]);
+  }, [loggedIn]);
 
   const { toast } = useToast();
 

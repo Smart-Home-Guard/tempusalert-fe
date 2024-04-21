@@ -17,7 +17,7 @@ export default function Root() {
     } else {
       startTransition(() => redirect('/login'));
     }
-  }, [ready, loggedIn]);
+  }, [loggedIn]);
 
   return <></>
 }
