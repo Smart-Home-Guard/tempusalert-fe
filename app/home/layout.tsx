@@ -3,12 +3,12 @@
 import "@/styles/globals.css";
 
 import { NavigationBar } from "./navbar";
-import { useLocalStorage } from "@/lib/useLocalStorage";
 import { redirect } from "next/navigation";
 import { useEffect, useTransition } from "react";
+import { useLoggedInStore } from "@/store";
 
 export default function HomeLayout({ children }: RootLayoutProps) {
-  const [loggedIn, setLoggedIn] = useLocalStorage("loggedIn", true);
+  const { loggedIn } = useLoggedInStore();
   const [, startTransition] = useTransition();
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function HomeLayout({ children }: RootLayoutProps) {
 
   return (
       <div className="flex min-h-screen bg-neutral-light">
-        <NavigationBar loggedIn={loggedIn} setLoggedIn={setLoggedIn}/>
+        <NavigationBar/>
         <div>{ children }</div>
       </div>
   )
