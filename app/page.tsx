@@ -5,15 +5,19 @@ import { redirect } from 'next/navigation';
 import { useEffect, useTransition } from 'react';
 
 export default function Root() {
-  const { loggedIn } = useLoggedInStore();
+  const { ready, loggedIn } = useLoggedInStore();
   const [, startTransition] = useTransition();
   useEffect(() => {
+    if (!ready) {
+      return;
+    }
+
     if (loggedIn) {
       startTransition(() => redirect('/home'));
     } else {
       startTransition(() => redirect('/login'));
     }
-  }, [loggedIn]);
+  }, [ready, loggedIn]);
 
   return <></>
 }
