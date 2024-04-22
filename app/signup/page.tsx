@@ -107,7 +107,7 @@ export default function SignupPage() {
           </Alert>
         }
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
+          <form onSubmit={form.handleSubmit(onSubmit)} encType="text/plain">
             <FormField
               control={form.control}
               name="email"
