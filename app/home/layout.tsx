@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import "@/styles/globals.css";
 
@@ -7,20 +7,24 @@ import { redirect } from "next/navigation";
 import { useEffect, useTransition } from "react";
 import { useLoggedInStore } from "@/store";
 
-export default function HomeLayout({ children }: RootLayoutProps) {
+export default function HomeLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { ready, loggedIn } = useLoggedInStore();
   const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (ready && !loggedIn) {
-      startTransition(() => redirect('/login'));
+      startTransition(() => redirect("/login"));
     }
-  }, [ready, loggedIn])
+  }, [ready, loggedIn]);
 
   return (
-      <div className="flex min-h-screen bg-neutral-light">
-        <NavigationBar/>
-        <div>{ children }</div>
-      </div>
-  )
+    <div className="flex min-h-screen bg-neutral-light">
+      <NavigationBar />
+      <div className="ml-250">{children}</div>
+    </div>
+  );
 }

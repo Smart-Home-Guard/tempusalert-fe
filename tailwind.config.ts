@@ -96,6 +96,7 @@ const config = {
     },
     height: {
       "full": "100%",
+      "half": "50%",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",

@@ -9,7 +9,8 @@ import ClientApplication from "./clientApplication";
 
 export const metadata: Metadata = {
   title: "Tempusalert",
-  description: "An interface for displaying sensor metrics and remote controlling your smart house",
+  description:
+    "An interface for displaying sensor metrics and remote controlling your smart house",
 };
 
 const fontSans = FontSans({
@@ -17,7 +18,11 @@ const fontSans = FontSans({
   variable: "--font-sans",
 });
 
-export default function RootLayout({ children }: RootLayoutProps) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <head />
@@ -28,10 +33,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
         )}
       >
         <ClientApplication>
-          <main>{ children }</main>
+          <main>{children}</main>
         </ClientApplication>
         <Toaster />
       </body>
     </html>
-  )
+  );
 }
