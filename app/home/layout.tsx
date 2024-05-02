@@ -22,9 +22,9 @@ export default function HomeLayout({
   }, [ready, loggedIn]);
 
   return (
-    <div className="flex min-h-screen bg-neutral-light">
+    <div className="flex min-h-screen bg-neutral-very-light">
       <NavigationBar />
-      <div className="ml-250">{children}</div>
+      <div className="ml-250 p-12 w-full">{children}</div>
     </div>
   );
 }
