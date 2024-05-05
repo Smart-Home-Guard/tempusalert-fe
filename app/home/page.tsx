@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -8,13 +9,26 @@ import {
   BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { HomeIcon, ShieldCheckIcon, Volume2Icon } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
+import {
+  ChevronDownIcon,
+  HomeIcon,
+  ShieldCheckIcon,
+  Volume2Icon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const MyChart = dynamic(() => import("./chart"), { ssr: false });
 
 export default function HomePage() {
+  const [position, setPosition] = useState<string>("bottom");
+
   const ROOM = [
     {
       id: 0,
@@ -63,6 +77,10 @@ export default function HomePage() {
     },
   ];
 
+  const DEVICE_IN_ROOM = [
+    
+  ]
+
   return (
     <div className="grid gap-4">
       <Breadcrumb>
@@ -100,9 +118,13 @@ export default function HomePage() {
                 <div>
                   <div className="flex items-center gap-1">
                     <ShieldCheckIcon size={18} color="gray" />
-                    <p className="text-neutral-very-dark font-extrabold text-20">{room.name}</p>
+                    <p className="text-neutral-very-dark font-bold text-20">
+                      {room.name}
+                    </p>
                   </div>
-                  <p className="text-neutral-dark font-bold text-14">{room.status}</p>
+                  <p className="text-neutral-dark font-bold text-14">
+                    {room.status}
+                  </p>
                 </div>
                 <Volume2Icon size={18} color="gray" />
               </CardContent>
@@ -110,19 +132,80 @@ export default function HomePage() {
           ))}
         </div>
       </Card>
-      <div className="grid items-center justify-center text-center">
-        <Tabs defaultValue="CO" className="w-[900px]">
-          <TabsList className="flex items-center gap-4 justify-start">
-            <TabsTrigger value="CO">CO</TabsTrigger>
-            <TabsTrigger value="Smoke">Smoke</TabsTrigger>
-            <TabsTrigger value="Flame">Flame</TabsTrigger>
-            <TabsTrigger value="LPG">LPG</TabsTrigger>
-          </TabsList>
-          <TabsContent value="CO">
-            <MyChart />
-          </TabsContent>
-          <TabsContent value="password">Change your password here.</TabsContent>
-        </Tabs>
+      <div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild className="p-16 bg-neutral-dark w-192">
+            <Button
+              variant="outline"
+              className="text-[#FFFFFF] flex items-center justify-between"
+            >
+              <p>Open</p>
+              <ChevronDownIcon size={18} color="white" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-full z-50 bg-[#FFFFFF] shadow-lg p-16 text-left">
+            <DropdownMenuRadioGroup
+              value={position}
+              onValueChange={setPosition}
+            >
+              <DropdownMenuRadioItem value="top">
+                CO Concentration
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="bottom">
+                Smoke
+              </DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="right">Flame</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="right">
+                Gas Leak
+              </DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Card className="w-full bg-[rgb(255,255,255)] border-none drop-shadow-md">
+          <CardContent className="grid grid-cols-4 justify-center divide-x divide-neutral-dark">
+            <div className="p-16 col-span-3">
+              <MyChart />
+            </div>
+            <div className="p-16 flex flex-col gap-4">
+              <p className="flex justify-center items-start text-neutral-very-dark text-24 font-bold">
+                Rooms
+              </p>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-4">
+                  <hr className="w-24 bg-danger text-danger h-4" />
+                  <div className="flex items-center gap-1">
+                    <p className="text-neutral-very-dark text-16 font-semibold">
+                      Bedroom F1:
+                    </p>
+                    <p className="text-neutral-very-dark text-16 font-normal">
+                      50ppm
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <hr className="w-24 bg-primary text-primary h-4" />
+                  <div className="flex items-center gap-1">
+                    <p className="text-neutral-very-dark text-16 font-semibold">
+                      Bedroom F1:
+                    </p>
+                    <p className="text-neutral-very-dark text-16 font-normal">
+                      50ppm
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <hr className="w-24 bg-neutral-very-dark text-neutral-very-dark h-4" />
+                  <p className="text-neutral-very-dark text-16 font-normal">
+                    Kitchen:
+                  </p>
+                  <p className="text-neutral-very-dark text-16 font-semibold">
+                    50ppm
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

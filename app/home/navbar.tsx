@@ -107,7 +107,7 @@ export function NavigationBar() {
 
   return (
     <nav
-      className="min-h-screen bg-primary-slightly-dark text-neutral-very-light w-250 shadow-xl shadow-primary-slightly-light fixed"
+      className="min-h-screen bg-primary-slightly-dark text-neutral-very-light w-[220px] shadow-xl shadow-primary-slightly-light fixed"
       onMouseEnter={() => setIsHoverSidebar(true)}
       onMouseLeave={() => setIsHoverSidebar(false)}
     >
