@@ -20,68 +20,66 @@ export default function ClientApplication({ children }: PropsWithChildren<{}>) {
   const { notificationPushed, setNotificationPushed } =
     useNotificationPushedStore();
 
-  const pushNotificationRegister = useCallback(
-    () => async () => {
-      const permission = await window.Notification.requestPermission();
-      const applicationServerKey = urlBase64ToUint8Array(
-        await apiClient
-          .GET("/api/push-credential/public-key")
-          .then(({ data }) => data!)
+  const pushNotificationRegister = useCallback(async () => {
+    const permission = await window.Notification.requestPermission();
+    const applicationServerKey = urlBase64ToUint8Array(
+      await apiClient
+        .GET("/api/push-credential/public-key")
+        .then(({ data }) => data!)
+    );
+    if (permission === "granted") {
+      navigator.serviceWorker.register(
+        "/push-notification-listener.js"
       );
-      if (permission === "granted") {
-        const registration = await navigator.serviceWorker.register(
-          "/push-notification-listener.js"
-        );
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey,
-        });
-        const { data, error } = await apiClient.POST(
-          "/api/push-credential/{email}",
-          {
-            params: { path: { email } },
-            body: {
-              credential: {
-                email,
-                endpoint: subscription.endpoint,
-                key: {
-                  auth: btoa(
-                    String.fromCharCode(
-                      ...new Uint8Array(subscription.getKey("auth")!)
-                    )
-                  ),
-                  p256dh: btoa(
-                    String.fromCharCode(
-                      ...new Uint8Array(subscription.getKey("p256dh")!)
-                    )
-                  ),
-                },
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey,
+      });
+      const { data, error } = await apiClient.POST(
+        "/api/push-credential/{email}",
+        {
+          params: { path: { email } },
+          body: {
+            credential: {
+              email,
+              endpoint: subscription.endpoint,
+              key: {
+                auth: btoa(
+                  String.fromCharCode(
+                    ...new Uint8Array(subscription.getKey("auth")!)
+                  )
+                ),
+                p256dh: btoa(
+                  String.fromCharCode(
+                    ...new Uint8Array(subscription.getKey("p256dh")!)
+                  )
+                ),
               },
             },
-            headers: {
-              jwt,
-            },
-          }
-        );
-
-        if (data) {
-          toast({
-            title: "Successful push subscription",
-            description: data.message,
-            variant: "safe",
-          });
-          setNotificationPushed(true);
-        } else {
-          toast({
-            title: "Failed push subscription",
-            description: error.message,
-            variant: "destructive",
-          });
+          },
+          headers: {
+            jwt,
+          },
         }
+      );
+
+      if (data) {
+        toast({
+          title: "Successful push subscription",
+          description: data.message,
+          variant: "safe",
+        });
+        setNotificationPushed(true);
+      } else {
+        toast({
+          title: "Failed push subscription",
+          description: error.message,
+          variant: "destructive",
+        });
       }
-    },
-    [email, jwt, setNotificationPushed, toast]
-  );
+    }
+  }, [email, jwt, setNotificationPushed, toast]);
 
   useEffect(() => {
     if (email && !notificationPushed) {
