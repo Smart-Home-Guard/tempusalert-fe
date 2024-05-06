@@ -56,7 +56,7 @@ export function NavigationPane({ className = "" }: { className?: string }) {
       <NavigationTab title="Home" url="/home" icon={<HomeIcon />} />
       <NavigationTab
         title="Fire alert"
-        url="/fire-alert"
+        url="/home/fire-alert"
         icon={<FlameIcon />}
       />
     </div>
