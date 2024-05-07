@@ -11,7 +11,7 @@ type ComponentType = "fire alarm" | "panic button" | "gas leak";
 export default function HomePage() {
   const Header = () => {
     return (
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row justify-between pt-24 px-24">
         <h1 className="text-30 font-bold">Devices & Rooms</h1>
         <div className="flex flex-row gap-5 pt-16">
           <Button className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal">
@@ -152,6 +152,31 @@ export default function HomePage() {
             status="dangerous"
             message={["high CO", "smoke detected", "flame detection"]}
           />
+          <ComponentStatusCard
+            componentName="gas leak"
+            status="dangerous"
+            message={["high CO", "smoke detected", "flame detection"]}
+          />
+          <ComponentStatusCard
+            componentName="gas leak"
+            status="dangerous"
+            message={["high CO", "smoke detected", "flame detection"]}
+          />
+          <ComponentStatusCard
+            componentName="gas leak"
+            status="dangerous"
+            message={["high CO", "smoke detected", "flame detection"]}
+          />
+          <ComponentStatusCard
+            componentName="gas leak"
+            status="dangerous"
+            message={["high CO", "smoke detected", "flame detection"]}
+          />
+          <ComponentStatusCard
+            componentName="gas leak"
+            status="dangerous"
+            message={["high CO", "smoke detected", "flame detection"]}
+          />
           <ComponentStatusCard componentName="panic button" status="idle" />
         </div>
       </div>
@@ -159,12 +184,15 @@ export default function HomePage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-24">
+    <div className="flex flex-col gap-8">
       <Header />
-      <div className="flex flex-row gap-8 ">
+      <div className="pl-24 flex flex-row gap-8 overflow-x-auto">
         <RoomStatusInformation roomName="Bedroom F1" />
         <RoomStatusInformation roomName="Bedroom F2" />
         <RoomStatusInformation roomName="Kitchen" />
+        <RoomStatusInformation roomName="Laundry" />
+        <RoomStatusInformation roomName="Laundry" />
+        <RoomStatusInformation roomName="Laundry" />
         <RoomStatusInformation roomName="Laundry" />
       </div>
     </div>
