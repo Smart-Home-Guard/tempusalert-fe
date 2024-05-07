@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { FlameIcon, ToggleLeftIcon, SprayCanIcon } from "lucide-react";
 import { capitalizeFirstLetterAndLowercaseRest } from "@/lib/capitalizeFirstLetterAndLowercaseRest";
+import { components } from "@/types/openapi-spec";
+import { apiClient } from "@/lib/apiClient";
+import { useCallback, useEffect, useState } from "react";
 
 type SensorNotificationStatus = "dangerous" | "safe" | "idle";
-type ComponentType = "fire alarm" | "panic button" | "gas leak";
 
 export default function HomePage() {
   const Header = () => {
@@ -27,7 +29,8 @@ export default function HomePage() {
 
   const RoomStatusInformation: React.FC<{
     roomName: string;
-  }> = ({ roomName }) => {
+    devices: components["schemas"]["Component"][];
+  }> = ({ roomName, devices }) => {
     const RoomNameHeader: React.FC<{
       roomName: string;
       status: SensorNotificationStatus;
@@ -70,19 +73,19 @@ export default function HomePage() {
     };
 
     const ComponentStatusCard: React.FC<{
-      componentName: ComponentType;
+      componentName: components["schemas"]["ComponentType"];
       status: SensorNotificationStatus;
       message?: string[];
     }> = ({ componentName, status, message }) => {
       const ComponentIcon: React.FC<{
-        componentName: ComponentType;
+        componentName: components["schemas"]["ComponentType"];
       }> = ({ componentName }) => {
         switch (componentName) {
-          case "fire alarm":
+          case "Fire":
             return <FlameIcon size={48} />;
-          case "gas leak":
+          case "FireButton":
             return <ToggleLeftIcon size={48} />;
-          case "panic button":
+          case "LPG":
             return <SprayCanIcon size={48} />;
         }
       };
@@ -146,54 +149,48 @@ export default function HomePage() {
       <div className="flex flex-col gap-4">
         <RoomNameHeader roomName={roomName} status="dangerous" />
         <div className="flex flex-col gap-2">
-          <ComponentStatusCard componentName="fire alarm" status="safe" />
-          <ComponentStatusCard
-            componentName="gas leak"
-            status="dangerous"
-            message={["high CO", "smoke detected", "flame detection"]}
-          />
-          <ComponentStatusCard
-            componentName="gas leak"
-            status="dangerous"
-            message={["high CO", "smoke detected", "flame detection"]}
-          />
-          <ComponentStatusCard
-            componentName="gas leak"
-            status="dangerous"
-            message={["high CO", "smoke detected", "flame detection"]}
-          />
-          <ComponentStatusCard
-            componentName="gas leak"
-            status="dangerous"
-            message={["high CO", "smoke detected", "flame detection"]}
-          />
-          <ComponentStatusCard
-            componentName="gas leak"
-            status="dangerous"
-            message={["high CO", "smoke detected", "flame detection"]}
-          />
-          <ComponentStatusCard
-            componentName="gas leak"
-            status="dangerous"
-            message={["high CO", "smoke detected", "flame detection"]}
-          />
-          <ComponentStatusCard componentName="panic button" status="idle" />
+          {devices.map(({ id, kind, logs }) => (
+            <ComponentStatusCard
+              key={id}
+              componentName={kind}
+              status={logs[0].Disconnect ? "idle" : "safe"}
+            />
+          ))}
         </div>
       </div>
     );
   };
 
+  const [userRoomData, setUserRoomData] = useState<
+    components["schemas"]["ResponseRoom"][]
+  >([]);
+
+  const fetchData = useCallback(async () => {
+    const response = await apiClient.GET("/api/rooms/", {
+      params: {
+        query: { email: localStorage.getItem("email")?.slice(1, -1) || "" },
+      },
+    });
+    setUserRoomData(response.data?.GetAllRooms?.value || []);
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   return (
     <div className="flex flex-col gap-8">
       <Header />
       <div className="pl-24 flex flex-row gap-8 overflow-x-auto">
-        <RoomStatusInformation roomName="Bedroom F1" />
-        <RoomStatusInformation roomName="Bedroom F2" />
-        <RoomStatusInformation roomName="Kitchen" />
-        <RoomStatusInformation roomName="Laundry" />
-        <RoomStatusInformation roomName="Laundry" />
-        <RoomStatusInformation roomName="Laundry" />
-        <RoomStatusInformation roomName="Laundry" />
+        {userRoomData.map(({ name, devices }) =>
+          devices.map(({ id, components }) => (
+            <RoomStatusInformation
+              key={id}
+              roomName={name}
+              devices={components}
+            />
+          ))
+        )}
       </div>
     </div>
   );
