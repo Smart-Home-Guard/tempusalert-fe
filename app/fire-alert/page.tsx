@@ -8,9 +8,13 @@ import { components } from "@/types/openapi-spec";
 import { apiClient } from "@/lib/apiClient";
 import { useCallback, useEffect, useState } from "react";
 
-type SensorNotificationStatus = "dangerous" | "safe" | "idle";
+type NotificationStatus = components["schemas"]["FireStatus"] | "IDLE";
 
 export default function HomePage() {
+  const [userRoomData, setUserRoomData] = useState<
+    components["schemas"]["ResponseRoom"][]
+  >([]);
+
   const Header = () => {
     return (
       <div className="flex flex-row justify-between pt-24 px-24">
@@ -31,23 +35,25 @@ export default function HomePage() {
     roomName: string;
     devices: components["schemas"]["Component"][];
   }> = ({ roomName, devices }) => {
+    const [roomStatus, setRoomStatus] = useState<NotificationStatus>("IDLE");
+
     const RoomNameHeader: React.FC<{
       roomName: string;
-      status: SensorNotificationStatus;
+      status: NotificationStatus;
     }> = ({ roomName, status }) => {
       const RoomStatusTag: React.FC<{
-        status: SensorNotificationStatus;
+        status: NotificationStatus;
       }> = ({ status }) => {
         let tagStyle = "";
 
         switch (status) {
-          case "safe":
+          case "SAFE":
             tagStyle = "bg-safe text-safe-very-light";
             break;
-          case "dangerous":
+          case "UNSAFE":
             tagStyle = "bg-danger text-danger-very-light";
             break;
-          case "idle":
+          case "IDLE":
             tagStyle = "bg-warning text-warning-very-light";
             break;
         }
@@ -73,10 +79,14 @@ export default function HomePage() {
     };
 
     const ComponentStatusCard: React.FC<{
+      key: number;
       componentName: components["schemas"]["ComponentType"];
-      status: SensorNotificationStatus;
+      isIdle: Boolean;
       message?: string[];
-    }> = ({ componentName, status, message }) => {
+    }> = ({ key, componentName, isIdle, message }) => {
+      const [componentStatus, setComponentStatus] =
+        useState<NotificationStatus>("IDLE");
+
       const ComponentIcon: React.FC<{
         componentName: components["schemas"]["ComponentType"];
       }> = ({ componentName }) => {
@@ -91,18 +101,18 @@ export default function HomePage() {
       };
 
       const ComponentStatusTag: React.FC<{
-        status: SensorNotificationStatus;
+        status: NotificationStatus;
       }> = ({ status }) => {
         let tagStyle = "";
 
         switch (status) {
-          case "safe":
+          case "SAFE":
             tagStyle = "bg-safe-very-light text-safe";
             break;
-          case "dangerous":
+          case "UNSAFE":
             tagStyle = "bg-danger-very-light text-danger";
             break;
-          case "idle":
+          case "IDLE":
             tagStyle = "bg-warning-very-light text-warning";
             break;
         }
@@ -120,6 +130,37 @@ export default function HomePage() {
         ? message.map(capitalizeFirstLetterAndLowercaseRest).join(", ")
         : "";
 
+      const fetchComponentStatus = useCallback(async () => {
+        if (isIdle) {
+          setComponentStatus("IDLE");
+          return;
+        }
+
+        const response = await apiClient.GET("/api/fire-alert/status", {
+          params: {
+            query: {
+              email: localStorage.getItem("email")?.slice(1, -1) || "",
+              component_id: key.toString(),
+            },
+          },
+        });
+
+        const componentStatusResult = response.data?.status || "IDLE";
+
+        if (
+          componentStatusResult !== "IDLE" &&
+          roomStatus !== "UNSAFE" &&
+          roomStatus !== componentStatusResult
+        )
+          setRoomStatus(componentStatusResult);
+
+        setComponentStatus(componentStatusResult);
+      }, [isIdle, key]);
+
+      useEffect(() => {
+        fetchComponentStatus;
+      }, [fetchComponentStatus]);
+
       return (
         <Card className="flex flex-row gap-4 justify-start items-center max-w-80 min-h-28 px-16 py-16 rounded-sm border-neutral-slightly-dark text-neutral-dark">
           <div>
@@ -130,12 +171,14 @@ export default function HomePage() {
               <h5 className="text-20 font-semibold">
                 {capitalizeFirstLetterAndLowercaseRest(componentName)}
               </h5>
-              {status === "dangerous" && <ComponentStatusTag status={status} />}
+              {componentStatus === "UNSAFE" && (
+                <ComponentStatusTag status={componentStatus} />
+              )}
             </div>
 
             <div className="font-normal text-14">
-              {status !== "dangerous" ? (
-                <ComponentStatusTag status={status} />
+              {componentStatus !== "UNSAFE" ? (
+                <ComponentStatusTag status={componentStatus} />
               ) : (
                 <div>{dangerousInformation}</div>
               )}
@@ -147,13 +190,13 @@ export default function HomePage() {
 
     return (
       <div className="flex flex-col gap-4">
-        <RoomNameHeader roomName={roomName} status="dangerous" />
+        <RoomNameHeader roomName={roomName} status={roomStatus} />
         <div className="flex flex-col gap-2">
           {devices.map(({ id, kind, logs }) => (
             <ComponentStatusCard
               key={id}
               componentName={kind}
-              status={logs[0].Disconnect ? "idle" : "safe"}
+              isIdle={logs[0].Disconnect !== undefined ? true : false}
             />
           ))}
         </div>
@@ -161,11 +204,7 @@ export default function HomePage() {
     );
   };
 
-  const [userRoomData, setUserRoomData] = useState<
-    components["schemas"]["ResponseRoom"][]
-  >([]);
-
-  const fetchData = useCallback(async () => {
+  const fetchRoomsData = useCallback(async () => {
     const response = await apiClient.GET("/api/rooms/", {
       params: {
         query: { email: localStorage.getItem("email")?.slice(1, -1) || "" },
@@ -175,8 +214,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchRoomsData();
+  }, [fetchRoomsData]);
 
   return (
     <div className="flex flex-col gap-8">
