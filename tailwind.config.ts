@@ -1,14 +1,14 @@
-import type { Config } from "tailwindcss"
-import { fontFamily } from "tailwindcss/defaultTheme"
+import type { Config } from "tailwindcss";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 const config = {
   darkMode: ["class"],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-	],
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -39,7 +39,7 @@ const config = {
       "72": ["var(--text-72)", "var(--small-line-height)"],
     },
     margin: {
-      "auto": "auto",
+      auto: "auto",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",
@@ -76,7 +76,8 @@ const config = {
       "768": "var(--space-768)",
     },
     width: {
-      "full": "100%",
+      full: "100%",
+      fit: "var(--fit)",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",
@@ -95,8 +96,9 @@ const config = {
       "768": "var(--space-768)",
     },
     height: {
-      "full": "100%",
-      "half": "50%",
+      full: "100%",
+      half: "50%",
+      fit: "var(--fit)",
       "4": "var(--space-4)",
       "8": "var(--space-8)",
       "12": "var(--space-12)",
@@ -121,34 +123,34 @@ const config = {
       "neutral-very-light": "#F5F5FA",
       "neutral-light": "#E1E6E8",
       "neutral-slightly-light": "#CDD2DC",
-      "neutral": "#B4C3CD",
+      neutral: "#B4C3CD",
       "neutral-slightly-dark": "#8791A5",
       "neutral-dark": "#5F6978",
       "neutral-very-dark": "#1E2832",
       "primary-very-light": "#EBF5FF",
       "primary-light": "#AAD2F5",
       "primary-slightly-light": "#5FA0D7",
-      "primary": "#2D82C8",
+      primary: "#2D82C8",
       "primary-slightly-dark": "#2364A0",
       "primary-dark": "#19466E",
       "primary-very-dark": "#0F2837",
       "safe-very-light": "#E6FFFA",
       "safe-slightly-light": "#6ED7D2",
-      "safe": "#3CAAA0",
+      safe: "#3CAAA0",
       "safe-slightly-dark": "#289187",
       "safe-dark": "#19645A",
       "safe-very-dark": "#0C4141",
       "warning-very-light": "#FFFAF0",
       "warning-light": "#FAF0D7",
       "warning-slightly-light": "#FAE19B",
-      "warning": "#F0C864",
+      warning: "#F0C864",
       "warning-slightly-dark": "#C8A53C",
       "warning-dark": "#8C691E",
       "warning-very-dark": "#5A460F",
       "danger-very-light": "#FAE6E6",
       "danger-light": "#F5AAAA",
       "danger-slightly-light": "#E6464",
-      "danger": "#DC2D2D",
+      danger: "#DC2D2D",
       "danger-slightly-dark": "#B41E1E",
       "danger-dark": "#871919",
       "danger-very-dark": "#5F1414",
@@ -176,6 +178,6 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+} satisfies Config;
 
-export default config
+export default config;

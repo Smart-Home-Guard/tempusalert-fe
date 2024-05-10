@@ -71,6 +71,7 @@
     --space-512: 512px;
     --space-640: 640px;
     --space-768: 768px;
+    --fit: fit-content;
 
     --border: var(--neutral-dark);
     --input: var(--neutral-very-light);

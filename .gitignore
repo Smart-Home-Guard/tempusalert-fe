@@ -38,3 +38,4 @@ next-env.d.ts
 openapi-spec.ts
 
 .env
+.vscode/
