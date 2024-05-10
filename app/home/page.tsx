@@ -82,8 +82,8 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="grid gap-4 overflow-x-auto">
-      <Card className="w-full bg-[#FFFFFF] border-none shadow-md grid grid-cols-4 divide-x divide-neutral-slightly-light">
+    <div className="flex flex-col gap-4 overflow-x-auto">
+      <Card className="w-full bg-[#FFFFFF] border-none shadow-md">
         <div className="p-16 flex flex-col">
           <CardContent className="flex flex-col items-center justify-center h-full">
             <p className="text-neutral-dark text-20 font-normal">
@@ -91,8 +91,8 @@ export default function HomePage() {
             </p>
             <p className="text-safe-slightly-dark text-36 font-bold">SAFE</p>
           </CardContent>
-          <CardFooter className="flex justify-between items-end">
-            <Button variant="outline" className="p-16">
+          <CardFooter className="flex justify-center md:justify-end  items-end gap-4 my-8 sm:my-4">
+            <Button variant="outline" className="p-16 sm:text-14 text-12">
               Mute all
             </Button>
             <Button variant="outline" className="p-16">
@@ -106,15 +106,15 @@ export default function HomePage() {
               key={room.id}
               className="w-full bg-[#FFFFFF] border-none drop-shadow-md hover:cursor-pointer hover:shadow-lg"
             >
-              <CardContent className="p-16 flex items-center justify-between">
+              <CardContent className="p-16 flex flex-col md:flex-row gap-1 items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex flex-col text-center md:flex-row items-center gap-1">
                     <ShieldCheckIcon size={18} color="gray" />
-                    <p className="text-neutral-very-dark font-bold text-20">
+                    <p className="text-neutral-very-dark font-bold md:text-20 text-14"> 
                       {room.name}
                     </p>
                   </div>
-                  <p className="text-neutral-dark font-bold text-14">
+                  <p className="text-neutral-dark font-bold md:text-14 text-12 text-center md:text-left">
                     {room.status}
                   </p>
                 </div>
