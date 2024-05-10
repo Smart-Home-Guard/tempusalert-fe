@@ -129,86 +129,84 @@ function RoomStatusSection() {
 function MetricChart() {
   const [metricType, setMetricType] = useState<string>("co");
   
-  return (
-    <div>
-      <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild className="p-16 bg-neutral-dark">
-          <Button
-            variant="outline"
-            className="text-neutral-very-light flex items-center justify-between"
-          >
-            <p>Open</p>
-            <ChevronDownIcon size={18} color="white" />
-          </Button>
-        </DropdownMenuTrigger>
-        
-        <DropdownMenuPortal>
-          <DropdownMenuContent className="w-full z-50 bg-neutral-very-light shadow-lg p-4 text-left">
-            <DropdownMenuRadioGroup
-              value={metricType}
-              onValueChange={setMetricType}
+  return ( 
+    <Card className="w-full bg-[#FFFFFF] border-none drop-shadow-md">
+      <CardContent className="justify-center items-start p-16">
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild className="p-16 bg-neutral-dark">
+            <Button
+              variant="outline"
+              className="text-neutral-very-light flex items-center justify-between"
             >
-              <DropdownMenuRadioItem value="co" className="hover:bg-primary hover:text-neutral-light">
-                CO Concentration
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="smoke">
-                Smoke
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="flame">
-                Flame
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="gas">
-                Gas Leak
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenuPortal>
-      </DropdownMenu>
-      <Card className="w-full bg-[rgb(255,255,255)] border-none drop-shadow-md">
-        <CardContent className="grid grid-cols-4 justify-center divide-x divide-neutral-dark">
-          <div className="p-16 col-span-3">
-            <MyChart />
-          </div>
-          <div className="p-16 flex flex-col gap-4">
-            <p className="flex justify-center items-start text-neutral-very-dark text-24 font-bold">
-              Rooms
-            </p>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center gap-4">
-              <hr className="w-24 bg-danger text-danger h-4" />
-                <div className="flex items-center gap-1">
-                  <p className="text-neutral-very-dark text-16 font-semibold">
-                    Bedroom F1:
-                  </p>
-                  <p className="text-neutral-very-dark text-16 font-normal">
-                    50ppm
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <hr className="w-24 bg-primary text-primary h-4" />
-                <div className="flex items-center gap-1">
-                  <p className="text-neutral-very-dark text-16 font-semibold">
-                    Bedroom F1:
-                  </p>
-                  <p className="text-neutral-very-dark text-16 font-normal">
-                    50ppm
-                  </p>
-                </div>
-              </div>
+              <p>Open</p>
+              <ChevronDownIcon size={18} color="white" />
+            </Button>
+          </DropdownMenuTrigger>
+        
+          <DropdownMenuPortal>
+            <DropdownMenuContent className="w-full z-50 bg-neutral-very-light shadow-lg p-4 text-left">
+              <DropdownMenuRadioGroup
+                value={metricType}
+                onValueChange={setMetricType}
+              >
+                <DropdownMenuRadioItem value="co" className="hover:bg-primary hover:text-neutral-light">
+                  CO Concentration
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="smoke">
+                  Smoke
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="flame">
+                  Flame
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="gas">
+                  Gas Leak
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenu>
+        <div className="p-16 col-span-3">
+          <MyChart />
+        </div>
+        <div className="p-16 flex flex-col gap-4">
+          <p className="flex justify-center items-start text-neutral-very-dark text-24 font-bold">
+            Rooms
+          </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <hr className="w-24 bg-danger text-danger h-4" />
               <div className="flex items-center gap-1">
-                <hr className="w-24 bg-neutral-very-dark text-neutral-very-dark h-4" />
-                <p className="text-neutral-very-dark text-16 font-normal">
-                  Kitchen:
-                </p>
                 <p className="text-neutral-very-dark text-16 font-semibold">
+                  Bedroom F1:
+                </p>
+                <p className="text-neutral-very-dark text-16 font-normal">
                   50ppm
                 </p>
               </div>
             </div>
+            <div className="flex items-center gap-4">
+              <hr className="w-24 bg-primary text-primary h-4" />
+              <div className="flex items-center gap-1">
+                <p className="text-neutral-very-dark text-16 font-semibold">
+                  Bedroom F1:
+                </p>
+                <p className="text-neutral-very-dark text-16 font-normal">
+                  50ppm
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <hr className="w-24 bg-neutral-very-dark text-neutral-very-dark h-4" />
+              <p className="text-neutral-very-dark text-16 font-normal">
+                Kitchen:
+              </p>
+              <p className="text-neutral-very-dark text-16 font-semibold">
+                50ppm
+              </p>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
