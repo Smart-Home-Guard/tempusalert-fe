@@ -83,14 +83,6 @@ export default function HomePage() {
 
   return (
     <div className="grid gap-4">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem className="flex items-center">
-            <HomeIcon size={18} />
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
       <Card className="w-full bg-[#FFFFFF] border-none shadow-md grid grid-cols-4 divide-x divide-neutral-slightly-light">
         <div className="p-16 flex flex-col">
           <CardContent className="flex flex-col items-center justify-center h-full">
