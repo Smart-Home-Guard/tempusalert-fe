@@ -2,12 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-} from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -18,7 +12,6 @@ import {
 } from "@radix-ui/react-dropdown-menu";
 import {
   ChevronDownIcon,
-  HomeIcon,
   ShieldCheckIcon,
   Volume2Icon,
 } from "lucide-react";
@@ -129,7 +122,7 @@ export default function HomePage() {
           <DropdownMenuTrigger asChild className="p-16 bg-neutral-dark w-192">
             <Button
               variant="outline"
-              className="text-[#FFFFFF] flex items-center justify-between"
+              className="text-neutral-very-light flex items-center justify-between"
             >
               <p>Open</p>
               <ChevronDownIcon size={18} color="white" />
