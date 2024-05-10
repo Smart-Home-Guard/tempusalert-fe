@@ -127,8 +127,30 @@ function RoomStatusSection() {
 }
 
 function MetricChart() {
-  const [metricType, setMetricType] = useState<string>("co");
+  const [metricType, setMetricType] = useState<"co"|"smoke"|"flame"|"gas">("co");
   
+  const metricTypeMap: Record<"co"|"smoke"|"flame"|"gas", {
+    title: string,
+    subtitle: string
+  }> = {
+    co: {
+      title: "CO concentration",
+      subtitle: "By ppm",
+    },
+    flame: {
+      title: "Heat",
+      subtitle: "By °C",
+    },
+    gas: {
+      title: "Gas concentration",
+      subtitle: "By ppm",
+    },
+    smoke: {
+      title: "Smoke concentration",
+      subtitle: "By ppm",
+    },
+  }
+
   return ( 
     <Card className="w-full bg-[#FFFFFF] border-none drop-shadow-md">
       <CardContent className="justify-center items-start p-16">
@@ -147,7 +169,7 @@ function MetricChart() {
             <DropdownMenuContent className="w-full z-50 bg-neutral-slightly-light shadow-lg p-4 text-left rounded-lg">
               <DropdownMenuRadioGroup
                 value={metricType}
-                onValueChange={setMetricType}
+                onValueChange={setMetricType as any}
               >
                 <DropdownMenuRadioItem value="co" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
                   CO Concentration
@@ -166,7 +188,7 @@ function MetricChart() {
           </DropdownMenuPortal>
         </DropdownMenu>
         <div className="p-16 col-span-3">
-          <MetricHistoryChart data={{}} title={metricType} subtitle="" />
+          <MetricHistoryChart data={{}} {...metricTypeMap[metricType]} />
         </div>
       </CardContent>
     </Card>
