@@ -26,7 +26,7 @@ export default function HomeLayout({
   return (
     <div className="flex flex-row min-h-screen gap-4 bg-neutral-very-light">
       <NavigationBar />
-      <div className="p-12 w-full">
+      <div className="p-12 w-full transform transition duration-300 ease-in-out">
         <Breadcrumb className="mb-8">
           <BreadcrumbList>
             <BreadcrumbItem className="flex items-center">

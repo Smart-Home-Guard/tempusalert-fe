@@ -112,7 +112,7 @@ export function NavigationBar() {
       onMouseEnter={() => { hoverTimeout && clearTimeout(hoverTimeout); setIsHoverSidebar(true); }}
       onMouseLeave={() => setHoverTimeout(setTimeout(() => setIsHoverSidebar(false), 500))}
     >
-      {!isCollapsed && <div className="w-[220px]"/>}
+      <div className={`w-${isCollapsed ? "[0]" :"[220px]"} transform transition-all duration-300 ease-in-out`} />
       <nav
         className={`h-full bg-primary-slightly-dark text-neutral-very-light w-[220px] shadow-xl shadow-primary-slightly-light fixed transform transition duration-300 ease-in-out ${isCollapsed ? "-translate-x-full" : ""}`}
       >
