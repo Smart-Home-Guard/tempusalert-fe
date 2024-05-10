@@ -177,7 +177,10 @@ const config = {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@xpd/tailwind-3dtransforms"),
+  ],
 } satisfies Config;
 
 export default config;
