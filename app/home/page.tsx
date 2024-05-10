@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const MyChart = dynamic(() => import("./chart"), { ssr: false });
+const MetricHistoryChart = dynamic(() => import("./metricLineChart"), { ssr: false });
 
 export default function HomePage() {
  
@@ -166,45 +166,7 @@ function MetricChart() {
           </DropdownMenuPortal>
         </DropdownMenu>
         <div className="p-16 col-span-3">
-          <MyChart />
-        </div>
-        <div className="p-16 flex flex-col gap-4">
-          <p className="flex justify-center items-start text-neutral-very-dark text-24 font-bold">
-            Rooms
-          </p>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <hr className="w-24 bg-danger text-danger h-4" />
-              <div className="flex items-center gap-1">
-                <p className="text-neutral-very-dark text-16 font-semibold">
-                  Bedroom F1:
-                </p>
-                <p className="text-neutral-very-dark text-16 font-normal">
-                  50ppm
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <hr className="w-24 bg-primary text-primary h-4" />
-              <div className="flex items-center gap-1">
-                <p className="text-neutral-very-dark text-16 font-semibold">
-                  Bedroom F1:
-                </p>
-                <p className="text-neutral-very-dark text-16 font-normal">
-                  50ppm
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1">
-              <hr className="w-24 bg-neutral-very-dark text-neutral-very-dark h-4" />
-              <p className="text-neutral-very-dark text-16 font-normal">
-                Kitchen:
-              </p>
-              <p className="text-neutral-very-dark text-16 font-semibold">
-                50ppm
-              </p>
-            </div>
-          </div>
+          <MetricHistoryChart data={{}} title={metricType} subtitle="" />
         </div>
       </CardContent>
     </Card>
