@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   DropdownMenu,
@@ -16,68 +16,101 @@ import {
   ShieldCheckIcon,
   Volume2Icon,
 } from "lucide-react";
+import _ from "lodash";
 import { Button } from "@/components/ui/button";
+import { apiClient } from "@/lib/apiClient";
+import { useEmailStore, useJwtStore } from "@/store";
+import { useToast } from "@/components/ui/use-toast";
 
 const MetricHistoryChart = dynamic(() => import("./metricLineChart"), { ssr: false });
 
+type RoomStatus = {
+  name: string,
+  components: {
+    id: number,
+    status: string,
+  }[],
+}
+
 export default function HomePage() {
- 
+  const [rooms, setRooms] = useState<RoomStatus[]>([]);
+  
+  const { toast } = useToast();
+  const { email } = useEmailStore();
+  const { jwt } = useJwtStore();
+
+  const fetchRoomStatuses = useCallback(async () => {
+    const roomNamesRes = await apiClient.GET("/api/rooms/", {
+      params: {
+        query: {
+          email,
+          name_only: "",
+        }
+      },
+      headers: {
+        jwt, 
+      },
+    });
+
+    if (roomNamesRes.error) {
+      toast({
+        title: "Fetch room names failed",
+        description: roomNamesRes.error.message,
+        variant: "destructive",
+      }); 
+      return;
+    }
+
+    const roomNames = roomNamesRes.data.value as string[];
+
+    const roomStatusRes = await Promise.all(roomNames.map((name) => apiClient.GET("/api/fire-alert/status", {
+      params: {
+        query: {
+          email,
+          room_name: name,
+        },
+      },
+      headers: {
+        jwt,
+      },
+    })));
+
+    const err = roomStatusRes.find((res) => res.error);
+    if (err) {
+      toast({
+        title: "Fetch room statuses failed",
+        description: err.error!.message,
+        variant: "destructive",
+      }); 
+      return;
+    }
+    const roomStatuses = roomStatusRes.map((res) => res.data!.value!);
+
+    setRooms(_.zipWith(roomNames, roomStatuses, (name, statuses) => ({
+      name,
+      components: statuses,
+    }))); 
+  }, [email, jwt, toast]);
+
+  useEffect(() => {
+    fetchRoomStatuses();
+  }, [fetchRoomStatuses]);
+
   return (
     <div className="flex flex-col gap-4 overflow-x-auto">
-      <RoomStatusSection />
+      <RoomStatusSection rooms={rooms} />
       <MetricChart />
     </div>
   );
 }
 
-function RoomStatusSection() {
-  const ROOM = [
-    {
-      id: 0,
-      name: "Room A",
-      status: "Safe",
-    },
-    {
-      id: 1,
-      name: "Room B",
-      status: "Safe",
-    },
-    {
-      id: 2,
-      name: "Room C",
-      status: "Safe",
-    },
-    {
-      id: 3,
-      name: "Room D",
-      status: "Safe",
-    },
-    {
-      id: 4,
-      name: "Room E",
-      status: "Safe",
-    },
-    {
-      id: 5,
-      name: "Room F",
-      status: "Safe",
-    },
-    {
-      id: 6,
-      name: "Room G",
-      status: "Safe",
-    },
-    {
-      id: 7,
-      name: "Room H",
-      status: "Safe",
-    },
-    {
-      id: 8,
-      name: "Room I",
-      status: "Safe",
-    },
-  ];
+function RoomStatusSection({ rooms } : { rooms: RoomStatus[] }) {
+  const roomData = rooms.map((room) => ({
+    ...room,
+    isSafe: room.components.every((component) => component.status === "SAFE"),
+  }));
+  
+  const isHouseSafe = roomData.every((room) => room.isSafe);
 
   return (
     <Card className="w-full bg-[#FFFFFF] border-none shadow-md">
@@ -86,23 +119,25 @@ function RoomStatusSection() {
           <p className="text-neutral-dark text-20 font-normal">
             Your house is
           </p>
-          <p className="text-safe-slightly-dark text-36 font-bold">
-            SAFE
+          <p className={`${isHouseSafe ? "text-safe-slightly-dark" : "text-danger-slightly-dark"} text-36 font-bold`}>
+            {isHouseSafe ? "SAFE" : "UNSAFE"}
           </p>
         </CardContent>
-        <CardFooter className="flex justify-center md:justify-end  items-end gap-4 my-8 sm:my-4">
-          <Button variant="outline" className="p-16 sm:text-14 text-12">
-            Mute all
-          </Button>
-          <Button variant="outline" className="p-16">
-            Unmute all
-          </Button>
-        </CardFooter>
+        {
+          roomData.length > 0 && <CardFooter className="flex justify-center md:justify-end items-end gap-4 my-8 sm:my-4">
+            <Button variant="outline" className="p-16 sm:text-14 text-12">
+              Mute all
+            </Button>
+            <Button variant="outline" className="p-16">
+              Unmute all
+            </Button>
+          </CardFooter>
+        }
       </div>
       <div className="p-16 col-span-3 grid grid-cols-3 gap-4">
-        {ROOM.map((room) => (
+        {roomData.map((room) => (
           <Card
-            key={room.id}
+            key={room.name}
             className="w-full bg-[#FFFFFF] border-none drop-shadow-md hover:cursor-pointer hover:shadow-lg"
           >
             <CardContent className="p-16 flex flex-col md:flex-row gap-1 items-center justify-between">
@@ -113,8 +148,8 @@ function RoomStatusSection() {
                     {room.name}
                   </p>
                 </div>
-                <p className="text-neutral-dark font-bold md:text-14 text-12 text-center md:text-left">
-                  {room.status}
+                <p className={`${room.isSafe ? "text-safe-slightly-dark" : "text-danger-slightly-dark"} font-bold md:text-14 text-12 text-center md:text-left`}>
+                  {room.isSafe ? "safe" : "unsafe"}
                 </p>
               </div>
               <Volume2Icon size={18} color="gray" />
