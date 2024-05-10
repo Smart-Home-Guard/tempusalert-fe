@@ -7,7 +7,7 @@ import { redirect, usePathname } from "next/navigation";
 import { Fragment, useEffect, useTransition } from "react";
 import { useLoggedInStore } from "@/store";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { FlameIcon, HomeIcon, Slash } from "lucide-react";
+import { FlameIcon, HomeIcon } from "lucide-react";
 
 export default function HomeLayout({
   children,
@@ -67,7 +67,7 @@ function AppBreadcrumb() {
                   <BreadcrumbLink href={href}>{name}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator>
-                  <Slash />
+                  <p className="text-neutral">/</p>
                 </BreadcrumbSeparator>
               </Fragment>
             )
