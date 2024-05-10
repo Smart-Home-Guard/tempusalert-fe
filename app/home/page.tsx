@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuPortal,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
@@ -70,10 +71,6 @@ export default function HomePage() {
     },
   ];
 
-  const DEVICE_IN_ROOM = [
-    
-  ]
-
   return (
     <div className="flex flex-col gap-4 overflow-x-auto">
       <Card className="w-full bg-[#FFFFFF] border-none shadow-md">
@@ -118,7 +115,7 @@ export default function HomePage() {
         </div>
       </Card>
       <div>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild className="p-16 bg-neutral-dark w-192">
             <Button
               variant="outline"
@@ -128,23 +125,25 @@ export default function HomePage() {
               <ChevronDownIcon size={18} color="white" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-full z-50 bg-[#FFFFFF] shadow-lg p-16 text-left">
-            <DropdownMenuRadioGroup
-              value={position}
-              onValueChange={setPosition}
-            >
-              <DropdownMenuRadioItem value="top">
-                CO Concentration
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="bottom">
-                Smoke
-              </DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="right">Flame</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="right">
-                Gas Leak
-              </DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
+          <DropdownMenuPortal>
+            <DropdownMenuContent className="w-full z-50 bg-neutral-very-light shadow-lg p-16 text-left">
+              <DropdownMenuRadioGroup
+                value={position}
+                onValueChange={setPosition}
+              >
+                <DropdownMenuRadioItem value="top">
+                  CO Concentration
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="bottom">
+                  Smoke
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="right">Flame</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="right">
+                  Gas Leak
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
         </DropdownMenu>
         <Card className="w-full bg-[rgb(255,255,255)] border-none drop-shadow-md">
           <CardContent className="grid grid-cols-4 justify-center divide-x divide-neutral-dark">
