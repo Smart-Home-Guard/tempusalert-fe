@@ -144,21 +144,21 @@ function MetricChart() {
           </DropdownMenuTrigger>
         
           <DropdownMenuPortal>
-            <DropdownMenuContent className="w-full z-50 bg-neutral-very-light shadow-lg p-4 text-left">
+            <DropdownMenuContent className="w-full z-50 bg-neutral-slightly-light shadow-lg p-4 text-left rounded-lg">
               <DropdownMenuRadioGroup
                 value={metricType}
                 onValueChange={setMetricType}
               >
-                <DropdownMenuRadioItem value="co" className="hover:bg-primary hover:text-neutral-light">
+                <DropdownMenuRadioItem value="co" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
                   CO Concentration
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="smoke">
+                <DropdownMenuRadioItem value="smoke" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
                   Smoke
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="flame">
+                <DropdownMenuRadioItem value="flame" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
                   Flame
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="gas">
+                <DropdownMenuRadioItem value="gas" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
                   Gas Leak
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
