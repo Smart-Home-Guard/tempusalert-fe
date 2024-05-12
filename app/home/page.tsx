@@ -100,7 +100,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-4 overflow-x-auto">
       <RoomStatusSection rooms={rooms} />
-      <MetricChart />
+      <MetricChartSection rooms={rooms.map(({ name }) => name)} />
     </div>
   );
 }
@@ -162,7 +162,33 @@ function RoomStatusSection({ rooms } : { rooms: RoomStatus[] }) {
   )
 }
 
-function MetricChart() {
+function MetricChartSection({ rooms }: { rooms: string[] }) {
+  const [data, setData] = useState({});
+  const { email } = useEmailStore();
+  const { jwt } = useJwtStore();
+
+  useEffect(() => {
+    Promise.all(rooms.map((room_name) => apiClient.GET("/api/fire/status", {
+      params: {
+        query: {
+          email,
+          room_name,
+          fire: true,
+          gas: true,
+          heat: true,
+          light: true,
+          smoke: true,
+          buzzer: true,
+          button: true,
+          co: true,
+        },
+      },
+      headers: {
+        jwt,
+      },
+    }))).then(setData);
+  }, [rooms, email, jwt]);
+
   const [metricType, setMetricType] = useState<"co"|"smoke"|"flame"|"gas">("co");
   
   const metricTypeMap: Record<"co"|"smoke"|"flame"|"gas", {
