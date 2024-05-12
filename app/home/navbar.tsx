@@ -16,6 +16,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useEmailStore, useJwtStore, useLoggedInStore } from "@/store";
+import { TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
+import { Tooltip } from "@/components/ui/tooltip";
 
 export function NavigationTab({
   title,
@@ -96,7 +98,18 @@ export function AvatarPane({ className = "" }: { className?: string }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <p className="overflow-clip drop-shadow-md">{email}</p>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger className="overflow-hidden text-ellipsis drop-shadow-md whitespace-nowrap">
+            {email}
+          </TooltipTrigger>
+          <TooltipPortal>
+            <TooltipContent className="rounded-md bg-neutral-very-dark p-4 text-12 text-neutral-very-light shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2">
+              {email}
+            </TooltipContent>
+          </TooltipPortal>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }
