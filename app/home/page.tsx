@@ -63,7 +63,7 @@ export default function HomePage() {
 
     const roomNames = roomNamesRes.data.value as string[];
 
-    const roomStatusRes = await Promise.all(roomNames.map((name) => apiClient.GET("/api/fire-alert/status", {
+    const roomStatusRes = await Promise.all(roomNames.map((name) => apiClient.GET("/api/fire-alerts/status", {
       params: {
         query: {
           email,
