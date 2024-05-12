@@ -136,7 +136,7 @@ export default function HomePage() {
           return;
         }
 
-        const response = await apiClient.GET("/api/fire-alerts/status", {
+        const response = await apiClient.GET("/api/fire/status", {
           params: {
             query: {
               email: localStorage.getItem("email")?.slice(1, -1) || "",
@@ -145,7 +145,7 @@ export default function HomePage() {
           },
         });
 
-        const componentStatusResult = response.data?.status || "IDLE";
+        const componentStatusResult = (response.data as any)?.status || "IDLE";
 
         if (
           componentStatusResult !== "IDLE" &&
