@@ -84,7 +84,8 @@ export default function HomePage() {
       }); 
       return;
     }
-    const roomStatuses = roomStatusRes.map((res) => res.data!.value!);
+
+    const roomStatuses = roomStatusRes.map((res) => (res.data as any).component_statuses);
 
     setRooms(_.zipWith(roomNames, roomStatuses, (name, statuses) => ({
       name,
