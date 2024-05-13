@@ -216,7 +216,7 @@ export default function MetricLineChart<T extends string>({
         <div id="fireMatrixChart" className="plotly-chart"></div>
       ) : (
         <div className="w-full flex justify-center items-center">
-          {"There no data to show"}
+          {"There's no data to show"}
         </div>
       )}
     </div>
