@@ -190,7 +190,7 @@ export default function MetricLineChart<T extends string>({
   }, [data]);
 
   return (
-    <div className="grid">
+    <div>
       <div className="flex items-center justify-between w-full">
         <div className="flex flex-col items-start">
           <p className="text-neutral-very-dark text-24 font-bold">{title}</p>
