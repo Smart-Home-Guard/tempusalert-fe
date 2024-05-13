@@ -1,40 +1,84 @@
 export type ChartData<T extends string> = {
   [category in T]: {
-    timestamp: number;
+    timestamp: TimestampType;
     value: number;
+    component: number;
+    [key: string]: string | number | TimestampType;
   }[];
 };
 
-export function normalizeCategorizedData<T extends string>(data: ChartData<T>): ({ [key in T]: number } & Record<"timestamp", number>)[] {
-  const timestampMap: { [timestamp: number]: { [key in T]: number } } = {};
-  Object.keys(data)
-        .flatMap((key) => ({ ...data[key as T], key }))
-        .forEach(({ timestamp, value, key }: any) => {
-          if (!(timestamp in timestampMap)) {
-            timestampMap[timestamp] = {} as any;
-          }
-          (timestampMap[timestamp] as any)[key] = value;
-        } );
+type TimestampType = { nanos_since_epoch: number; secs_since_epoch: number };
 
-  const res = Object.keys(timestampMap)
-                    .map((timestamp) => ({ timestamp: parseInt(timestamp, 10), ...timestampMap[timestamp as any as number]}));
-  res.sort((a, b) => a.timestamp - b.timestamp);
+export type MetricChartData = {
+  roomName: string;
+} & ChartLineData;
 
-  Object.keys(data)
-        .forEach((key) => {
-          if (!(key in res[0])) {
-            (res[0] as any)[key] = 0;
-          }
-        });
+type ChartLineData = {
+  timestamp: number[];
+  value: number[];
+};
 
-  for (let i = 1; i < res.length; ++i) {
-    Object.keys(data)
-          .forEach((key) => {
-            if (!(key in res[i])) {
-              (res[i] as any)[key] = (res[i - 1] as any)[key];
-            }
-          });
+export function normalizeChartData(
+  data: ChartData<string>,
+  componentRoomMap: Map<number, string>
+): MetricChartData[] {
+  const metricChartData: Record<string, ChartLineData> = {};
+
+  Object.values(data).forEach((categoryData) => {
+    categoryData.forEach(({ timestamp, value, component }) => {
+      const roomName =
+        componentRoomMap.get(component) || `Unknown room ${component}`;
+      const millis =
+        timestamp.secs_since_epoch * 1000 +
+        Math.floor(timestamp.nanos_since_epoch / 1e6);
+
+      if (!metricChartData[roomName]) {
+        metricChartData[roomName] = { timestamp: [], value: [] };
+      }
+
+      metricChartData[roomName].timestamp.push(millis);
+      metricChartData[roomName].value.push(value);
+    });
+  });
+
+  for (const chartData of Object.values(metricChartData)) {
+    quickSort(chartData.timestamp, chartData.value);
   }
 
+  const res: MetricChartData[] = Object.entries(metricChartData).map(
+    ([roomName, chartData]) => ({
+      timestamp: chartData.timestamp,
+      value: chartData.value,
+      roomName: roomName,
+    })
+  );
+
   return res;
+}
+
+function quickSort(
+  arr: number[],
+  values: number[],
+  left = 0,
+  right = arr.length - 1
+) {
+  if (left >= right) return;
+
+  const pivot = arr[Math.floor((left + right) / 2)];
+  let i = left;
+  let j = right;
+
+  while (i <= j) {
+    while (arr[i] < pivot) i++;
+    while (arr[j] > pivot) j--;
+    if (i <= j) {
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      [values[i], values[j]] = [values[j], values[i]];
+      i++;
+      j--;
+    }
+  }
+
+  quickSort(arr, values, left, j);
+  quickSort(arr, values, i, right);
 }
