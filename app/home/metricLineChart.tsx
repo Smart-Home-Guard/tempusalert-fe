@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 import { addDays, endOfDay, format, startOfDay, subDays } from "date-fns";
 
 import * as Plotly from "plotly.js-dist-min";
@@ -47,6 +47,10 @@ export default function MetricLineChart<T extends string>({
 
   const handleIncreaseDate = () => {
     setCurrentDate((prevDate) => addDays(prevDate, 1));
+  };
+
+  const handlePickDate = (event: BaseSyntheticEvent) => {
+    setCurrentDate(new Date(event.target.value));
   };
 
   useEffect(() => {
@@ -204,7 +208,7 @@ export default function MetricLineChart<T extends string>({
             className="cursor-pointer"
             onClick={handleDecreaseDate}
           />
-          {format(currentDate, "MM/dd/yyyy")}
+          <input type='date' value={format(currentDate, "yyyy-MM-dd")} onChange={handlePickDate} className="bg-neutral" />
           <ChevronRightIcon
             size={16}
             className="cursor-pointer"
