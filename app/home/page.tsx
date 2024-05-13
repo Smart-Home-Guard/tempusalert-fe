@@ -11,30 +11,30 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import {
-  ChevronDownIcon,
-  ShieldCheckIcon,
-  Volume2Icon,
-} from "lucide-react";
+import { ChevronDownIcon, ShieldCheckIcon, Volume2Icon } from "lucide-react";
 import _ from "lodash";
 import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/apiClient";
 import { useEmailStore, useJwtStore } from "@/store";
 import { useToast } from "@/components/ui/use-toast";
 
-const MetricHistoryChart = dynamic(() => import("./metricLineChart"), { ssr: false });
+const MetricHistoryChart = dynamic(() => import("./metricLineChart"), {
+  ssr: false,
+});
+
+export type MetricType = "co" | "smoke" | "flame" | "gas";
 
 type RoomStatus = {
-  name: string,
+  name: string;
   components: {
-    id: number,
-    status: string,
-  }[],
-}
+    id: number;
+    status: string;
+  }[];
+};
 
 export default function HomePage() {
   const [rooms, setRooms] = useState<RoomStatus[]>([]);
-  
+
   const { toast } = useToast();
   const { email } = useEmailStore();
   const { jwt } = useJwtStore();
@@ -45,10 +45,10 @@ export default function HomePage() {
         query: {
           email,
           name_only: "",
-        }
+        },
       },
       headers: {
-        jwt, 
+        jwt,
       },
     });
 
@@ -57,23 +57,27 @@ export default function HomePage() {
         title: "Fetch room names failed",
         description: roomNamesRes.error.message,
         variant: "destructive",
-      }); 
+      });
       return;
     }
 
     const roomNames = roomNamesRes.data.value as string[];
 
-    const roomStatusRes = await Promise.all(roomNames.map((name) => apiClient.GET("/api/fire/status", {
-      params: {
-        query: {
-          email,
-          room_name: name,
-        },
-      },
-      headers: {
-        jwt,
-      },
-    })));
+    const roomStatusRes = await Promise.all(
+      roomNames.map((name) =>
+        apiClient.GET("/api/fire/status", {
+          params: {
+            query: {
+              email,
+              room_name: name,
+            },
+          },
+          headers: {
+            jwt,
+          },
+        })
+      )
+    );
 
     const err = roomStatusRes.find((res) => res.error);
     if (err) {
@@ -81,16 +85,20 @@ export default function HomePage() {
         title: "Fetch room statuses failed",
         description: err.error!.message,
         variant: "destructive",
-      }); 
+      });
       return;
     }
 
-    const roomStatuses = roomStatusRes.map((res) => (res.data as any).component_statuses);
+    const roomStatuses = roomStatusRes.map(
+      (res) => (res.data as any).component_statuses
+    );
 
-    setRooms(_.zipWith(roomNames, roomStatuses, (name, statuses) => ({
-      name,
-      components: statuses,
-    }))); 
+    setRooms(
+      _.zipWith(roomNames, roomStatuses, (name, statuses) => ({
+        name,
+        components: statuses,
+      }))
+    );
   }, [email, jwt, toast]);
 
   useEffect(() => {
@@ -105,27 +113,31 @@ export default function HomePage() {
   );
 }
 
-function RoomStatusSection({ rooms } : { rooms: RoomStatus[] }) {
+function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
   const roomData = rooms.map((room) => ({
     ...room,
     isSafe: room.components.every((component) => component.status === "SAFE"),
   }));
-  
+
   const isHouseSafe = roomData.every((room) => room.isSafe);
 
   return (
     <Card className="w-full bg-[#FFFFFF] border-none shadow-md">
       <div className="p-16 flex flex-col">
         <CardContent className="flex flex-col items-center justify-center h-full">
-          <p className="text-neutral-dark text-20 font-normal">
-            Your house is
-          </p>
-          <p className={`${isHouseSafe ? "text-safe-slightly-dark" : "text-danger-slightly-dark"} text-36 font-bold`}>
+          <p className="text-neutral-dark text-20 font-normal">Your house is</p>
+          <p
+            className={`${
+              isHouseSafe
+                ? "text-safe-slightly-dark"
+                : "text-danger-slightly-dark"
+            } text-36 font-bold`}
+          >
             {isHouseSafe ? "SAFE" : "UNSAFE"}
           </p>
         </CardContent>
-        {
-          roomData.length > 0 && <CardFooter className="flex justify-center md:justify-end items-end gap-4 my-8 sm:my-4">
+        {roomData.length > 0 && (
+          <CardFooter className="flex justify-center md:justify-end items-end gap-4 my-8 sm:my-4">
             <Button variant="outline" className="p-16 sm:text-14 text-12">
               Mute all
             </Button>
@@ -133,7 +145,7 @@ function RoomStatusSection({ rooms } : { rooms: RoomStatus[] }) {
               Unmute all
             </Button>
           </CardFooter>
-        }
+        )}
       </div>
       <div className="p-16 col-span-3 grid grid-cols-3 gap-4">
         {roomData.map((room) => (
@@ -145,11 +157,17 @@ function RoomStatusSection({ rooms } : { rooms: RoomStatus[] }) {
               <div>
                 <div className="flex flex-col text-center md:flex-row items-center gap-1">
                   <ShieldCheckIcon size={18} color="gray" />
-                  <p className="text-neutral-very-dark font-bold md:text-20 text-14"> 
+                  <p className="text-neutral-very-dark font-bold md:text-20 text-14">
                     {room.name}
                   </p>
                 </div>
-                <p className={`${room.isSafe ? "text-safe-slightly-dark" : "text-danger-slightly-dark"} font-bold md:text-14 text-12 text-center md:text-left`}>
+                <p
+                  className={`${
+                    room.isSafe
+                      ? "text-safe-slightly-dark"
+                      : "text-danger-slightly-dark"
+                  } font-bold md:text-14 text-12 text-center md:text-left`}
+                >
                   {room.isSafe ? "safe" : "unsafe"}
                 </p>
               </div>
@@ -159,7 +177,7 @@ function RoomStatusSection({ rooms } : { rooms: RoomStatus[] }) {
         ))}
       </div>
     </Card>
-  )
+  );
 }
 
 function MetricChartSection({ rooms }: { rooms: string[] }) {
@@ -168,33 +186,40 @@ function MetricChartSection({ rooms }: { rooms: string[] }) {
   const { jwt } = useJwtStore();
 
   useEffect(() => {
-    Promise.all(rooms.map((room_name) => apiClient.GET("/api/fire/status", {
-      params: {
-        query: {
-          email,
-          room_name,
-          fire: true,
-          gas: true,
-          heat: true,
-          light: true,
-          smoke: true,
-          buzzer: true,
-          button: true,
-          co: true,
-        },
-      },
-      headers: {
-        jwt,
-      },
-    }))).then(setData);
+    Promise.all(
+      rooms.map((room_name) =>
+        apiClient.GET("/api/fire/status", {
+          params: {
+            query: {
+              email,
+              room_name,
+              fire: true,
+              gas: true,
+              heat: true,
+              light: true,
+              smoke: true,
+              buzzer: true,
+              button: true,
+              co: true,
+            },
+          },
+          headers: {
+            jwt,
+          },
+        })
+      )
+    ).then(setData);
   }, [rooms, email, jwt]);
 
-  const [metricType, setMetricType] = useState<"co"|"smoke"|"flame"|"gas">("co");
-  
-  const metricTypeMap: Record<"co"|"smoke"|"flame"|"gas", {
-    title: string,
-    subtitle: string
-  }> = {
+  const [metricType, setMetricType] = useState<MetricType>("co");
+
+  const metricTypeMap: Record<
+    MetricType,
+    {
+      title: string;
+      subtitle: string;
+    }
+  > = {
     co: {
       title: "CO concentration",
       subtitle: "By ppm",
@@ -211,9 +236,9 @@ function MetricChartSection({ rooms }: { rooms: string[] }) {
       title: "Smoke concentration",
       subtitle: "By ppm",
     },
-  }
+  };
 
-  return ( 
+  return (
     <Card className="w-full bg-[#FFFFFF] border-none drop-shadow-md">
       <CardContent className="justify-center items-start p-16">
         <DropdownMenu modal={false}>
@@ -226,23 +251,35 @@ function MetricChartSection({ rooms }: { rooms: string[] }) {
               <ChevronDownIcon size={18} color="white" />
             </Button>
           </DropdownMenuTrigger>
-        
+
           <DropdownMenuPortal>
             <DropdownMenuContent className="w-full z-50 bg-neutral-slightly-light shadow-lg p-4 text-left rounded-lg">
               <DropdownMenuRadioGroup
                 value={metricType}
                 onValueChange={setMetricType as any}
               >
-                <DropdownMenuRadioItem value="co" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
+                <DropdownMenuRadioItem
+                  value="co"
+                  className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                >
                   CO Concentration
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="smoke" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
+                <DropdownMenuRadioItem
+                  value="smoke"
+                  className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                >
                   Smoke
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="flame" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
+                <DropdownMenuRadioItem
+                  value="flame"
+                  className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                >
                   Flame
                 </DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="gas" className="hover:bg-primary hover:text-neutral-light rounded-lg p-4">
+                <DropdownMenuRadioItem
+                  value="gas"
+                  className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                >
                   Gas Leak
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
@@ -250,9 +287,13 @@ function MetricChartSection({ rooms }: { rooms: string[] }) {
           </DropdownMenuPortal>
         </DropdownMenu>
         <div className="p-16 col-span-3">
-          <MetricHistoryChart data={{}} {...metricTypeMap[metricType]} />
+          <MetricHistoryChart
+            data={{}}
+            {...metricTypeMap[metricType]}
+            metricType={metricType}
+          />
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
