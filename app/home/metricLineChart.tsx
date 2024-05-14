@@ -60,7 +60,7 @@ export default function MetricLineChart<T extends string>({
         const end_time = Math.floor(endOfDay(currentDate).getTime() / 1000);
 
         const metricDataResponse = await apiClient.GET(
-          `/api/fire/${apiFireLogMap[metricType]}`,
+          `/api/fire-alert/${apiFireLogMap[metricType]}`,
           {
             params: {
               query: {

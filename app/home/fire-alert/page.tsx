@@ -136,7 +136,7 @@ export default function HomePage() {
           return;
         }
 
-        const response = await apiClient.GET("/api/fire/status", {
+        const response = await apiClient.GET("/api/fire-alert/status", {
           params: {
             query: {
               email: localStorage.getItem("email")?.slice(1, -1) || "",
