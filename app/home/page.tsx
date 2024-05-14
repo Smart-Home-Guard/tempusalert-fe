@@ -65,7 +65,7 @@ export default function HomePage() {
 
     const roomStatusRes = await Promise.all(
       roomNames.map((name) =>
-        apiClient.GET("/api/fire/status", {
+        apiClient.GET("/api/fire-alert/status", {
           params: {
             query: {
               email,
@@ -188,7 +188,7 @@ function MetricChartSection({ rooms }: { rooms: string[] }) {
   useEffect(() => {
     Promise.all(
       rooms.map((room_name) =>
-        apiClient.GET("/api/fire/status", {
+        apiClient.GET("/api/fire-alert/status", {
           params: {
             query: {
               email,
