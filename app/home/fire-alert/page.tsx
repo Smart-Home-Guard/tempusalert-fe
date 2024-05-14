@@ -320,7 +320,7 @@ export default function HomePage() {
 
         if (LightKindList.includes(componentKindId)) return <LightIcons />;
         if (BuzzerKindList.includes(componentKindId)) return <BuzzerIcons />;
-        return <div></div>;
+        return <div className="min-w-5"></div>;
       };
 
       const dangerousInformation = message
