@@ -22,6 +22,8 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 
 type NotificationStatus = "SAFE" | "DANGEROUS" | "IDLE";
+const LightKindList = [56];
+const BuzzerKindList = [57];
 
 export default function HomePage() {
   const [userRoomData, setUserRoomData] = useState<
@@ -29,14 +31,75 @@ export default function HomePage() {
   >([]);
 
   const Header = () => {
+    const buzzerList: { componentId: number; deviceId: number }[] = [];
+    userRoomData.map(({ devices }) =>
+      devices.map(({ id: deviceId, components }) => {
+        components.map(({ id: componentId, kind }) => {
+          if (BuzzerKindList.includes(Number(kind)))
+            buzzerList.push({ deviceId, componentId });
+        });
+      })
+    );
+
+    const handleClick = async (
+      command: components["schemas"]["BuzzerCommand"]
+    ) => {
+      if (buzzerList.length === 0) {
+        toast({
+          title: "There's no buzzer component",
+          variant: "default",
+        });
+        return;
+      }
+
+      const responses = await Promise.all(
+        buzzerList.map(async ({ deviceId, componentId }) => {
+          return await apiClient.POST(`/api/remote-control/buzzer`, {
+            params: {
+              query: {
+                email: localStorage.getItem("email")?.slice(1, -1) || "",
+              },
+            },
+            body: {
+              command,
+              component_id: componentId,
+              device_id: deviceId,
+            },
+          });
+        })
+      );
+
+      const err = responses.find((response) => response.error);
+      if (err) {
+        toast({
+          title: "Send command to all components failed",
+          description: err.error!.message,
+          variant: "destructive",
+        });
+        return;
+      } else {
+        toast({
+          title: "Send command to all components success",
+          variant: "safe",
+        });
+        return;
+      }
+    };
+
     return (
       <div className="flex flex-row justify-between pt-24 px-24">
         <h1 className="text-30 font-bold">Devices & Rooms</h1>
         <div className="flex flex-row gap-5 pt-16">
-          <Button className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal">
+          <Button
+            className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal"
+            onClick={() => handleClick("off")}
+          >
             Mute all
           </Button>
-          <Button className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal">
+          <Button
+            className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal"
+            onClick={() => handleClick("on")}
+          >
             Unmute all
           </Button>
         </div>
@@ -177,13 +240,19 @@ export default function HomePage() {
         const handleClick = async (
           command: components["schemas"]["BuzzerCommand"]
         ) => {
-          if (componentKindId !== 56 && componentKindId !== 57) {
+          if (
+            !LightKindList.includes(componentKindId) &&
+            !BuzzerKindList.includes(componentKindId)
+          ) {
             console.warn(`Invalid componentKindId: ${componentKindId}`);
             return;
           }
 
-          const type: "light" | "buzzer" =
-            componentKindId === 56 ? "light" : "buzzer";
+          const type: "light" | "buzzer" = LightKindList.includes(
+            componentKindId
+          )
+            ? "light"
+            : "buzzer";
 
           const response = await apiClient.POST(`/api/remote-control/${type}`, {
             params: {
@@ -200,9 +269,16 @@ export default function HomePage() {
 
           if (response.error) {
             toast({
-              title: "Fetch device statuses failed",
+              title: "Send command to component fail",
               description: response.error!.message,
               variant: "destructive",
+            });
+            return;
+          }
+          if (response.data) {
+            toast({
+              title: "Send command to component fail success",
+              variant: "safe",
             });
             return;
           }
@@ -242,14 +318,9 @@ export default function HomePage() {
           );
         };
 
-        switch (componentKindId) {
-          case 56:
-            return <LightIcons />;
-          case 57:
-            return <BuzzerIcons />;
-          default:
-            return <div></div>;
-        }
+        if (LightKindList.includes(componentKindId)) return <LightIcons />;
+        if (BuzzerKindList.includes(componentKindId)) return <BuzzerIcons />;
+        return <div></div>;
       };
 
       const dangerousInformation = message
