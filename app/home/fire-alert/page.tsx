@@ -210,7 +210,7 @@ export default function HomePage() {
         query: { email: localStorage.getItem("email")?.slice(1, -1) || "" },
       },
     });
-    setUserRoomData(response.data?.GetAllRooms?.value || []);
+    setUserRoomData((response.data as any)?.value || []);
   }, []);
 
   useEffect(() => {
