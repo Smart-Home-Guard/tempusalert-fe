@@ -277,7 +277,7 @@ export default function HomePage() {
           }
           if (response.data) {
             toast({
-              title: "Send command to component fail success",
+              title: "Send command to component success",
               variant: "safe",
             });
             return;
