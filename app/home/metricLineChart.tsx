@@ -208,7 +208,12 @@ export default function MetricLineChart<T extends string>({
             className="cursor-pointer"
             onClick={handleDecreaseDate}
           />
-          <input type='date' value={format(currentDate, "yyyy-MM-dd")} onChange={handlePickDate} className="bg-neutral cursor-pointer" />
+          <input
+            type="date"
+            value={format(currentDate, "yyyy-MM-dd")}
+            onChange={handlePickDate}
+            className="bg-neutral cursor-pointer"
+          />
           <ChevronRightIcon
             size={16}
             className="cursor-pointer"
@@ -261,7 +266,7 @@ function convertToComponentRoomMap(
         }
 
         const finalRoomName = hasMultipleComponents
-          ? `${roomName}_${roomCounter}`
+          ? `${roomName} ${roomCounter}`
           : roomName;
 
         componentRoomMap.set(component.id, finalRoomName);
