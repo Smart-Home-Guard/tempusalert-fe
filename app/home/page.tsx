@@ -11,7 +11,12 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
-import { ChevronDownIcon, ShieldCheckIcon, Volume2Icon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  CirclePlusIcon,
+  ShieldCheckIcon,
+  Volume2Icon,
+} from "lucide-react";
 import _ from "lodash";
 import { Button } from "@/components/ui/button";
 import { apiClient } from "@/lib/apiClient";
@@ -120,6 +125,30 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
   }));
 
   const isHouseSafe = roomData.every((room) => room.isSafe);
+  const { email } = useEmailStore();
+  const { jwt } = useJwtStore();
+  const { toast } = useToast();
+
+  const createRoom = async () => {
+    const res = await apiClient.POST("/api/rooms/", {
+      body: {
+        email,
+        room_name: "New Room",
+      },
+      headers: {
+        jwt,
+      },
+    });
+
+    if (res.error) {
+      toast({
+        title: "Create room failed",
+        description: res.error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+  };
 
   return (
     <Card className="w-full bg-[#FFFFFF] border-none shadow-md">
@@ -137,13 +166,22 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
           </p>
         </CardContent>
         {roomData.length > 0 && (
-          <CardFooter className="flex justify-center md:justify-end items-end gap-4 my-8 sm:my-4">
-            <Button variant="outline" className="p-16 sm:text-14 text-12">
-              Mute all
+          <CardFooter className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark"
+            >
+              <CirclePlusIcon size={18} color="white" />
+              Create new
             </Button>
-            <Button variant="outline" className="p-16">
-              Unmute all
-            </Button>
+            <div className="flex gap-4 my-8 sm:my-4">
+              <Button variant="outline" className="p-16 sm:text-14 text-12">
+                Mute all
+              </Button>
+              <Button variant="outline" className="p-16">
+                Unmute all
+              </Button>
+            </div>
           </CardFooter>
         )}
       </div>
