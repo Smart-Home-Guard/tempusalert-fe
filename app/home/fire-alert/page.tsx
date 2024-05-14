@@ -10,6 +10,10 @@ import {
   WindIcon,
   SirenIcon,
   BellRingIcon,
+  Volume2Icon,
+  VolumeXIcon,
+  LightbulbIcon,
+  LightbulbOffIcon,
 } from "lucide-react";
 import { capitalizeFirstLetterAndLowercaseRest } from "@/lib/capitalizeFirstLetterAndLowercaseRest";
 import { components } from "@/types/openapi-spec";
@@ -42,8 +46,9 @@ export default function HomePage() {
 
   const RoomStatusInformation: React.FC<{
     roomName: string;
-    devices: components["schemas"]["Component"][];
-  }> = ({ roomName, devices }) => {
+    deviceId: number;
+    components: components["schemas"]["Component"][];
+  }> = ({ roomName, components, deviceId }) => {
     const [roomStatus, setRoomStatus] = useState<NotificationStatus>("IDLE");
 
     const RoomNameHeader: React.FC<{
@@ -164,6 +169,89 @@ export default function HomePage() {
         );
       };
 
+      const CommandIcons: React.FC<{
+        componentId: number;
+        componentKindId: number;
+        deviceId: number;
+      }> = ({ componentId, componentKindId, deviceId }) => {
+        const handleClick = async (
+          command: components["schemas"]["BuzzerCommand"]
+        ) => {
+          if (componentKindId !== 56 && componentKindId !== 57) {
+            console.warn(`Invalid componentKindId: ${componentKindId}`);
+            return;
+          }
+
+          const type: "light" | "buzzer" =
+            componentKindId === 56 ? "light" : "buzzer";
+
+          const response = await apiClient.POST(`/api/remote-control/${type}`, {
+            params: {
+              query: {
+                email: localStorage.getItem("email")?.slice(1, -1) || "",
+              },
+            },
+            body: {
+              command,
+              component_id: componentId,
+              device_id: deviceId,
+            },
+          });
+
+          if (response.error) {
+            toast({
+              title: "Fetch device statuses failed",
+              description: response.error!.message,
+              variant: "destructive",
+            });
+            return;
+          }
+        };
+
+        const BuzzerIcons = () => {
+          return (
+            <div className="flex flex-col gap-2">
+              <Volume2Icon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("on")}
+              />
+              <VolumeXIcon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("off")}
+              />
+            </div>
+          );
+        };
+
+        const LightIcons = () => {
+          return (
+            <div className="flex flex-col gap-2">
+              <LightbulbIcon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("on")}
+              />
+              <LightbulbOffIcon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("off")}
+              />
+            </div>
+          );
+        };
+
+        switch (componentKindId) {
+          case 56:
+            return <LightIcons />;
+          case 57:
+            return <BuzzerIcons />;
+          default:
+            return <div></div>;
+        }
+      };
+
       const dangerousInformation = message
         ? message.map(capitalizeFirstLetterAndLowercaseRest).join(", ")
         : "";
@@ -192,6 +280,14 @@ export default function HomePage() {
           return;
         }
 
+        if ((response.data as any)?.value.length == 0) {
+          toast({
+            title: "Device not found",
+            variant: "destructive",
+          });
+          return;
+        }
+
         const componentStatusResult = (response.data as any)?.value[0].status;
 
         if (componentStatusResult === 0 || componentStatusResult === 1) {
@@ -214,7 +310,7 @@ export default function HomePage() {
           <div>
             <ComponentIcon componentName={componentName} />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-28">
             <div className="flex flex-row gap-2">
               <h5 className="text-20 font-semibold">
                 {capitalizeFirstLetterAndLowercaseRest(componentName)}
@@ -232,14 +328,20 @@ export default function HomePage() {
               )}
             </div>
           </div>
+          <CommandIcons
+            componentKindId={componentKindId}
+            componentId={componentId}
+            deviceId={deviceId}
+          />
         </Card>
       );
     };
+
     return (
       <div className="flex flex-col gap-4">
         <RoomNameHeader roomName={roomName} status={roomStatus} />
         <div className="flex flex-col gap-2">
-          {devices.map(({ id, kind, logs }) => (
+          {components.map(({ id, kind, logs }) => (
             <ComponentStatusCard
               key={id}
               componentId={id}
@@ -284,7 +386,8 @@ export default function HomePage() {
             <RoomStatusInformation
               key={id}
               roomName={name}
-              devices={components}
+              deviceId={id}
+              components={components}
             />
           ))
         )}
