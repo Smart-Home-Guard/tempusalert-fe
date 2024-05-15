@@ -2,13 +2,28 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FlameIcon, ToggleLeftIcon, SprayCanIcon } from "lucide-react";
+import {
+  FlameIcon,
+  ToggleLeftIcon,
+  SprayCanIcon,
+  ThermometerIcon,
+  WindIcon,
+  SirenIcon,
+  BellRingIcon,
+  Volume2Icon,
+  VolumeXIcon,
+  LightbulbIcon,
+  LightbulbOffIcon,
+} from "lucide-react";
 import { capitalizeFirstLetterAndLowercaseRest } from "@/lib/capitalizeFirstLetterAndLowercaseRest";
 import { components } from "@/types/openapi-spec";
 import { apiClient } from "@/lib/apiClient";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "@/components/ui/use-toast";
 
-type NotificationStatus = components["schemas"]["FireStatus"] | "IDLE";
+type NotificationStatus = "SAFE" | "DANGEROUS" | "IDLE";
+const LightKindList = [56];
+const BuzzerKindList = [57];
 
 export default function HomePage() {
   const [userRoomData, setUserRoomData] = useState<
@@ -16,14 +31,75 @@ export default function HomePage() {
   >([]);
 
   const Header = () => {
+    const buzzerList: { componentId: number; deviceId: number }[] = [];
+    userRoomData.map(({ devices }) =>
+      devices.map(({ id: deviceId, components }) => {
+        components.map(({ id: componentId, kind }) => {
+          if (BuzzerKindList.includes(Number(kind)))
+            buzzerList.push({ deviceId, componentId });
+        });
+      })
+    );
+
+    const handleClick = async (
+      command: components["schemas"]["BuzzerCommand"]
+    ) => {
+      if (buzzerList.length === 0) {
+        toast({
+          title: "There's no buzzer component",
+          variant: "default",
+        });
+        return;
+      }
+
+      const responses = await Promise.all(
+        buzzerList.map(async ({ deviceId, componentId }) => {
+          return await apiClient.POST(`/api/remote-control/buzzer`, {
+            params: {
+              query: {
+                email: localStorage.getItem("email")?.slice(1, -1) || "",
+              },
+            },
+            body: {
+              command,
+              component_id: componentId,
+              device_id: deviceId,
+            },
+          });
+        })
+      );
+
+      const err = responses.find((response) => response.error);
+      if (err) {
+        toast({
+          title: "Send command to all components failed",
+          description: err.error!.message,
+          variant: "destructive",
+        });
+        return;
+      } else {
+        toast({
+          title: "Send command to all components success",
+          variant: "safe",
+        });
+        return;
+      }
+    };
+
     return (
       <div className="flex flex-row justify-between pt-24 px-24">
         <h1 className="text-30 font-bold">Devices & Rooms</h1>
         <div className="flex flex-row gap-5 pt-16">
-          <Button className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal">
+          <Button
+            className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal"
+            onClick={() => handleClick("off")}
+          >
             Mute all
           </Button>
-          <Button className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal">
+          <Button
+            className="bg-neutral-very-light hover:bg-neutral-slightly-light border-[1.5px] border-neutral-slightly-light rounded-none px-16 py-24 text-neutral-very-dark hover:text-neutral-slightly-dark font-normal"
+            onClick={() => handleClick("on")}
+          >
             Unmute all
           </Button>
         </div>
@@ -33,8 +109,9 @@ export default function HomePage() {
 
   const RoomStatusInformation: React.FC<{
     roomName: string;
-    devices: components["schemas"]["Component"][];
-  }> = ({ roomName, devices }) => {
+    deviceId: number;
+    components: components["schemas"]["Component"][];
+  }> = ({ roomName, components, deviceId }) => {
     const [roomStatus, setRoomStatus] = useState<NotificationStatus>("IDLE");
 
     const RoomNameHeader: React.FC<{
@@ -50,7 +127,7 @@ export default function HomePage() {
           case "SAFE":
             tagStyle = "bg-safe text-safe-very-light";
             break;
-          case "UNSAFE":
+          case "DANGEROUS":
             tagStyle = "bg-danger text-danger-very-light";
             break;
           case "IDLE":
@@ -79,11 +156,26 @@ export default function HomePage() {
     };
 
     const ComponentStatusCard: React.FC<{
-      key: number;
-      componentName: components["schemas"]["ComponentType"];
+      componentId: number;
+      componentKindId: number;
       isIdle: Boolean;
       message?: string[];
-    }> = ({ key, componentName, isIdle, message }) => {
+    }> = ({ componentId, componentKindId, isIdle, message }) => {
+      const componentKindNameMap: Map<
+        number,
+        components["schemas"]["ComponentType"]
+      > = new Map([
+        [50, "Smoke"],
+        [51, "Heat"],
+        [52, "CO"],
+        [53, "LPG"],
+        [54, "Fire"],
+        [55, "FireButton"],
+        [56, "FireLight"],
+        [57, "FireBuzzer"],
+      ]);
+      const componentName = componentKindNameMap.get(componentKindId)!;
+
       const [componentStatus, setComponentStatus] =
         useState<NotificationStatus>("IDLE");
 
@@ -97,6 +189,20 @@ export default function HomePage() {
             return <ToggleLeftIcon size={48} />;
           case "LPG":
             return <SprayCanIcon size={48} />;
+          case "Heat":
+            return <ThermometerIcon size={48} />;
+          case "Smoke":
+            return <WindIcon size={48} />;
+          case "FireBuzzer":
+            return <BellRingIcon size={48} />;
+          case "FireLight":
+            return <SirenIcon size={48} />;
+          case "CO":
+            return <WindIcon size={48} />;
+          case "GeneralBuzzer":
+            return <BellRingIcon size={48} />;
+          case "GeneralLight":
+            return <SirenIcon size={48} />;
         }
       };
 
@@ -109,7 +215,7 @@ export default function HomePage() {
           case "SAFE":
             tagStyle = "bg-safe-very-light text-safe";
             break;
-          case "UNSAFE":
+          case "DANGEROUS":
             tagStyle = "bg-danger-very-light text-danger";
             break;
           case "IDLE":
@@ -126,6 +232,97 @@ export default function HomePage() {
         );
       };
 
+      const CommandIcons: React.FC<{
+        componentId: number;
+        componentKindId: number;
+        deviceId: number;
+      }> = ({ componentId, componentKindId, deviceId }) => {
+        const handleClick = async (
+          command: components["schemas"]["BuzzerCommand"]
+        ) => {
+          if (
+            !LightKindList.includes(componentKindId) &&
+            !BuzzerKindList.includes(componentKindId)
+          ) {
+            console.warn(`Invalid componentKindId: ${componentKindId}`);
+            return;
+          }
+
+          const type: "light" | "buzzer" = LightKindList.includes(
+            componentKindId
+          )
+            ? "light"
+            : "buzzer";
+
+          const response = await apiClient.POST(`/api/remote-control/${type}`, {
+            params: {
+              query: {
+                email: localStorage.getItem("email")?.slice(1, -1) || "",
+              },
+            },
+            body: {
+              command,
+              component_id: componentId,
+              device_id: deviceId,
+            },
+          });
+
+          if (response.error) {
+            toast({
+              title: "Send command to component fail",
+              description: response.error!.message,
+              variant: "destructive",
+            });
+            return;
+          }
+          if (response.data) {
+            toast({
+              title: "Send command to component success",
+              variant: "safe",
+            });
+            return;
+          }
+        };
+
+        const BuzzerIcons = () => {
+          return (
+            <div className="flex flex-col gap-2">
+              <Volume2Icon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("on")}
+              />
+              <VolumeXIcon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("off")}
+              />
+            </div>
+          );
+        };
+
+        const LightIcons = () => {
+          return (
+            <div className="flex flex-col gap-2">
+              <LightbulbIcon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("on")}
+              />
+              <LightbulbOffIcon
+                className="hover:bg-neutral-slightly-light cursor-pointer border"
+                size={20}
+                onClick={() => handleClick("off")}
+              />
+            </div>
+          );
+        };
+
+        if (LightKindList.includes(componentKindId)) return <LightIcons />;
+        if (BuzzerKindList.includes(componentKindId)) return <BuzzerIcons />;
+        return <div className="min-w-5"></div>;
+      };
+
       const dangerousInformation = message
         ? message.map(capitalizeFirstLetterAndLowercaseRest).join(", ")
         : "";
@@ -140,25 +337,43 @@ export default function HomePage() {
           params: {
             query: {
               email: localStorage.getItem("email")?.slice(1, -1) || "",
-              component_id: key.toString(),
+              component_ids: `[${componentId}]`,
             },
           },
         });
 
-        const componentStatusResult = (response.data as any)?.status || "IDLE";
+        if (response.error) {
+          toast({
+            title: "Fetch device statuses failed",
+            description: response.error!.message,
+            variant: "destructive",
+          });
+          return;
+        }
 
-        if (
-          componentStatusResult !== "IDLE" &&
-          roomStatus !== "UNSAFE" &&
-          roomStatus !== componentStatusResult
-        )
-          setRoomStatus(componentStatusResult);
+        if ((response.data as any)?.value.length == 0) {
+          toast({
+            title: "Device not found",
+            variant: "destructive",
+          });
+          return;
+        }
 
-        setComponentStatus(componentStatusResult);
-      }, [isIdle, key]);
+        const componentStatusResult = (response.data as any)?.value[0].status;
+
+        if (componentStatusResult === 0 || componentStatusResult === 1) {
+          const componentStatus: NotificationStatus =
+            componentStatusResult === 0 ? "SAFE" : "DANGEROUS";
+
+          if (roomStatus !== "DANGEROUS" && roomStatus !== componentStatus)
+            setRoomStatus(componentStatus);
+
+          setComponentStatus(componentStatus);
+        } else setComponentStatus("IDLE"); // componentStatusResult is undefined
+      }, [componentId, isIdle]);
 
       useEffect(() => {
-        fetchComponentStatus;
+        fetchComponentStatus();
       }, [fetchComponentStatus]);
 
       return (
@@ -166,24 +381,29 @@ export default function HomePage() {
           <div>
             <ComponentIcon componentName={componentName} />
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-28">
             <div className="flex flex-row gap-2">
               <h5 className="text-20 font-semibold">
                 {capitalizeFirstLetterAndLowercaseRest(componentName)}
               </h5>
-              {componentStatus === "UNSAFE" && (
+              {componentStatus === "DANGEROUS" && (
                 <ComponentStatusTag status={componentStatus} />
               )}
             </div>
 
             <div className="font-normal text-14">
-              {componentStatus !== "UNSAFE" ? (
+              {componentStatus !== "DANGEROUS" ? (
                 <ComponentStatusTag status={componentStatus} />
               ) : (
                 <div>{dangerousInformation}</div>
               )}
             </div>
           </div>
+          <CommandIcons
+            componentKindId={componentKindId}
+            componentId={componentId}
+            deviceId={deviceId}
+          />
         </Card>
       );
     };
@@ -192,11 +412,12 @@ export default function HomePage() {
       <div className="flex flex-col gap-4">
         <RoomNameHeader roomName={roomName} status={roomStatus} />
         <div className="flex flex-col gap-2">
-          {devices.map(({ id, kind, logs }) => (
+          {components.map(({ id, kind, logs }) => (
             <ComponentStatusCard
               key={id}
-              componentName={kind}
-              isIdle={logs[0].Disconnect !== undefined ? true : false}
+              componentId={id}
+              componentKindId={Number(kind)}
+              isIdle={logs[0].Disconnect ? true : false}
             />
           ))}
         </div>
@@ -210,6 +431,16 @@ export default function HomePage() {
         query: { email: localStorage.getItem("email")?.slice(1, -1) || "" },
       },
     });
+
+    if (response.error) {
+      toast({
+        title: "Fetch device statuses failed",
+        description: response.error!.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUserRoomData((response.data as any)?.value || []);
   }, []);
 
@@ -226,7 +457,8 @@ export default function HomePage() {
             <RoomStatusInformation
               key={id}
               roomName={name}
-              devices={components}
+              deviceId={id}
+              components={components}
             />
           ))
         )}
