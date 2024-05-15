@@ -16,12 +16,34 @@ import {
   CirclePlusIcon,
   ShieldCheckIcon,
   Volume2Icon,
+  X,
+  XIcon,
 } from "lucide-react";
 import _ from "lodash";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { apiClient } from "@/lib/apiClient";
 import { useEmailStore, useJwtStore } from "@/store";
 import { useToast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const MetricHistoryChart = dynamic(() => import("./metricLineChart"), {
   ssr: false,
@@ -124,10 +146,24 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
     isSafe: room.components.every((component) => component.status === "SAFE"),
   }));
 
+  const formSchema = z.object({
+    room_name: z
+      .string()
+      .min(1, { message: "The room name must contain at least 1 character" }),
+  });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      room_name: "",
+    },
+  });
+
   const isHouseSafe = roomData.every((room) => room.isSafe);
   const { email } = useEmailStore();
   const { jwt } = useJwtStore();
   const { toast } = useToast();
+
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
 
   const createRoom = async () => {
     const res = await apiClient.POST("/api/rooms/", {
@@ -165,15 +201,67 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
             {isHouseSafe ? "SAFE" : "UNSAFE"}
           </p>
         </CardContent>
-        {roomData.length > 0 && (
-          <CardFooter className="flex justify-between items-center">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark"
-            >
-              <CirclePlusIcon size={18} color="white" />
-              Create new
-            </Button>
+        <CardFooter className="flex justify-between items-center">
+          <Dialog
+            open={openDialog}
+            onOpenChange={() => setOpenDialog(!openDialog)}
+          >
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2 p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark"
+              >
+                <CirclePlusIcon size={18} color="white" />
+                Create room
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px] bg-[#FFFFFF] border-none shadow-md p-16">
+              <DialogTitle className="flex items-center justify-between">
+                <p className="text-20 font-bold text-neutral-very-dark">
+                  Create room
+                </p>
+                <XIcon
+                  size={24}
+                  color="black"
+                  className="cursor-pointer p-4 hover:bg-neutral rounded-full"
+                  onClick={() => setOpenDialog(false)}
+                />
+              </DialogTitle>
+              <Form {...form}>
+                <form
+                  // onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+                >
+                  <FormField
+                    control={form.control}
+                    name="room_name"
+                    render={({ field }) => (
+                      <FormItem className="grid gap-4">
+                        <FormControl>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="room_name" className="text-right">
+                              Room Name
+                            </Label>
+                            <Input {...field} className="col-span-3" />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <DialogFooter>
+                    <Button
+                      type="submit"
+                      className="p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark"
+                    >
+                      Create room
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+          {roomData.length > 0 && (
             <div className="flex gap-4 my-8 sm:my-4">
               <Button variant="outline" className="p-16 sm:text-14 text-12">
                 Mute all
@@ -182,8 +270,8 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
                 Unmute all
               </Button>
             </div>
-          </CardFooter>
-        )}
+          )}
+        </CardFooter>
       </div>
       <div className="p-16 col-span-3 grid grid-cols-3 gap-4">
         {roomData.map((room) => (

@@ -154,6 +154,7 @@ const config = {
       "danger-slightly-dark": "#B41E1E",
       "danger-dark": "#871919",
       "danger-very-dark": "#5F1414",
+      "black/80": "#000000CC"
     },
     extends: {
       borderRadius: {
