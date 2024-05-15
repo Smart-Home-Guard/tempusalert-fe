@@ -36,7 +36,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { apiClient } from "@/lib/apiClient";
@@ -66,7 +65,7 @@ export default function HomePage() {
   const { email } = useEmailStore();
   const { jwt } = useJwtStore();
 
-  const fetchRoomStatuses = useCallback(async () => {
+  const fetchRoomStatus = useCallback(async () => {
     const roomNamesRes = await apiClient.GET("/api/rooms/", {
       params: {
         query: {
@@ -129,18 +128,24 @@ export default function HomePage() {
   }, [email, jwt, toast]);
 
   useEffect(() => {
-    fetchRoomStatuses();
-  }, [fetchRoomStatuses]);
+    fetchRoomStatus();
+  }, [fetchRoomStatus]);
 
   return (
     <div className="flex flex-col gap-4 overflow-x-auto">
-      <RoomStatusSection rooms={rooms} />
+      <RoomStatusSection rooms={rooms} fetchRoomStatus={fetchRoomStatus} />
       <MetricChartSection rooms={rooms.map(({ name }) => name)} />
     </div>
   );
 }
 
-function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
+function RoomStatusSection({
+  rooms,
+  fetchRoomStatus,
+}: {
+  rooms: RoomStatus[];
+  fetchRoomStatus: () => Promise<void>;
+}) {
   const roomData = rooms.map((room) => ({
     ...room,
     isSafe: room.components.every((component) => component.status === "SAFE"),
@@ -165,16 +170,18 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
 
-  const createRoom = async () => {
+  async function onSubmit(newRoom: z.infer<typeof formSchema>) {
     const res = await apiClient.POST("/api/rooms/", {
       body: {
         email,
-        room_name: "New Room",
+        room_name: newRoom.room_name,
       },
       headers: {
         jwt,
       },
     });
+    await fetchRoomStatus();
+    setOpenDialog(false);
 
     if (res.error) {
       toast({
@@ -184,7 +191,7 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
       });
       return;
     }
-  };
+  }
 
   return (
     <Card className="w-full bg-[#FFFFFF] border-none shadow-md">
@@ -204,7 +211,10 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
         <CardFooter className="flex justify-between items-center">
           <Dialog
             open={openDialog}
-            onOpenChange={() => setOpenDialog(!openDialog)}
+            onOpenChange={() => {
+              form.reset();
+              setOpenDialog(!openDialog);
+            }}
           >
             <DialogTrigger asChild>
               <Button
@@ -229,7 +239,7 @@ function RoomStatusSection({ rooms }: { rooms: RoomStatus[] }) {
               </DialogTitle>
               <Form {...form}>
                 <form
-                  // onSubmit={form.handleSubmit(onSubmit)}
+                  onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-8"
                 >
                   <FormField
