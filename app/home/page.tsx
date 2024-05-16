@@ -16,7 +16,6 @@ import {
   CirclePlusIcon,
   ShieldCheckIcon,
   Volume2Icon,
-  X,
   XIcon,
 } from "lucide-react";
 import _ from "lodash";
@@ -37,12 +36,14 @@ import {
   FormField,
   FormItem,
   FormMessage,
+  FormLabel,
 } from "@/components/ui/form";
 import { apiClient } from "@/lib/apiClient";
 import { useEmailStore, useJwtStore } from "@/store";
 import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { MultiSelect, OptionType } from "@/components/ui/multiselect";
 
 const MetricHistoryChart = dynamic(() => import("./metricLineChart"), {
   ssr: false,
@@ -180,8 +181,6 @@ function RoomStatusSection({
         jwt,
       },
     });
-    await fetchRoomStatus();
-    setOpenDialog(false);
 
     if (res.error) {
       toast({
@@ -191,6 +190,15 @@ function RoomStatusSection({
       });
       return;
     }
+
+    toast({
+      title: "Create room success",
+      description: "Room has been created",
+      variant: "safe",
+    });
+
+    await fetchRoomStatus();
+    setOpenDialog(false);
   }
 
   return (
@@ -285,31 +293,54 @@ function RoomStatusSection({
       </div>
       <div className="p-16 col-span-3 grid grid-cols-3 gap-4">
         {roomData.map((room) => (
-          <Card
-            key={room.name}
-            className="w-full bg-[#FFFFFF] border-none drop-shadow-md hover:cursor-pointer hover:shadow-lg"
-          >
-            <CardContent className="p-16 flex flex-col md:flex-row gap-1 items-center justify-between">
-              <div>
-                <div className="flex flex-col text-center md:flex-row items-center gap-1">
-                  <ShieldCheckIcon size={18} color="gray" />
-                  <p className="text-neutral-very-dark font-bold md:text-20 text-14">
-                    {room.name}
-                  </p>
-                </div>
-                <p
-                  className={`${
-                    room.isSafe
-                      ? "text-safe-slightly-dark"
-                      : "text-danger-slightly-dark"
-                  } font-bold md:text-14 text-12 text-center md:text-left`}
-                >
-                  {room.isSafe ? "safe" : "unsafe"}
-                </p>
+          <Dialog key={room.name}>
+            <DialogTrigger asChild>
+              <Card className="w-full bg-[#FFFFFF] border-none drop-shadow-md hover:cursor-pointer hover:shadow-lg">
+                <CardContent className="p-16 flex flex-col md:flex-row gap-1 items-center justify-between">
+                  <div>
+                    <div className="flex flex-col text-center md:flex-row items-center gap-1">
+                      <ShieldCheckIcon size={18} color="gray" />
+                      <p className="text-neutral-very-dark font-bold md:text-20 text-14">
+                        {room.name}
+                      </p>
+                    </div>
+                    <p
+                      className={`${
+                        room.isSafe
+                          ? "text-safe-slightly-dark"
+                          : "text-danger-slightly-dark"
+                      } font-bold md:text-14 text-12 text-center md:text-left`}
+                    >
+                      {room.isSafe ? "safe" : "unsafe"}
+                    </p>
+                  </div>
+                  <Volume2Icon size={18} color="gray" />
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent className="bg-[#FFFFFF] border-none shadow-md p-16">
+              <DialogTitle className="flex items-center justify-start text-20 font-bold text-neutral-very-dark">
+                {room.name}
+              </DialogTitle>
+              <DialogAddDevice roomName={room.name} />
+              <div className="grid grid-cols-2 gap-4">
+                {room.components.map((component) => (
+                  <div
+                    key={component.id}
+                    className={`${
+                      component.status === "SAFE"
+                        ? "bg-safe-slightly-dark"
+                        : "bg-danger-slightly-dark"
+                    } p-16 rounded-lg`}
+                  >
+                    <p className="text-14 font-bold text-neutral-very-light">
+                      {component.status}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <Volume2Icon size={18} color="gray" />
-            </CardContent>
-          </Card>
+            </DialogContent>
+          </Dialog>
         ))}
       </div>
     </Card>
@@ -431,5 +462,183 @@ function MetricChartSection({ rooms }: { rooms: string[] }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function DialogAddDevice({ roomName }: { roomName: string }) {
+  const { toast } = useToast();
+  const { email } = useEmailStore();
+  const { jwt } = useJwtStore();
+
+  const [deviceIds, setDeviceIds] = useState<OptionType[]>([]);
+
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
+  const formAddDeviceSchema = z.object({
+    device_ids: z
+      .array(z.custom<OptionType>())
+      .min(1, { message: "Please select at least one device." }),
+    email: z
+      .string()
+      .min(1, { message: "This field has to be filled." })
+      .email("This is not a valid email."),
+    room_name: z
+      .string()
+      .min(1, { message: "The room name must contain at least 1 character." }),
+  });
+
+  const fetchDeviceIds = useCallback(async () => {
+    const res = await apiClient.GET("/api/device-status/devices", {
+      params: {
+        query: {
+          email: email,
+        },
+      },
+      headers: {
+        jwt,
+      },
+    });
+
+    if (res.error) {
+      toast({
+        title: "Fetch device ids failed",
+        description: res.error.message,
+        variant: "destructive",
+      });
+      return [];
+    }
+
+    const deviceIds: OptionType[] =
+      res.data.devices?.map((device) => ({
+        label: `Device ${device.id}`,
+        value: `${device.id}`,
+      })) ?? [];
+    setDeviceIds(deviceIds);
+  }, [email, jwt, toast]);
+
+  useEffect(() => {
+    fetchDeviceIds();
+  }, [fetchDeviceIds]);
+
+  const formAddDevice = useForm<z.infer<typeof formAddDeviceSchema>>({
+    resolver: zodResolver(formAddDeviceSchema),
+    defaultValues: {
+      device_ids: deviceIds,
+      email: email,
+      room_name: roomName,
+    },
+  });
+
+  const onHandleSubmit = async (data: z.infer<typeof formAddDeviceSchema>) => {
+    const res = await apiClient.POST("/api/rooms/devices", {
+      body: {
+        email: data.email,
+        room_name: data.room_name,
+        device_ids: data.device_ids.map((id) => Number(id)),
+      },
+      headers: {
+        jwt,
+      },
+    });
+
+    if (res.error) {
+      toast({
+        title: "Add device failed",
+        description: res.error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Add device success",
+      description: "Device has been added to the room",
+      variant: "safe",
+    });
+    setOpenDialog(false);
+  };
+
+  return (
+    <Dialog
+      open={openDialog}
+      onOpenChange={() => {
+        formAddDevice.reset();
+        setOpenDialog(!openDialog);
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          className="flex w-fit items-center gap-2 p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark"
+        >
+          <CirclePlusIcon size={18} color="white" />
+          Add Device
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px] bg-[#FFFFFF] border-none shadow-md p-16">
+        <DialogTitle className="flex items-center justify-between">
+          <p className="text-20 font-bold text-neutral-very-dark">Add Device</p>
+          <XIcon
+            size={24}
+            color="black"
+            className="cursor-pointer p-4 hover:bg-neutral rounded-full"
+            onClick={() => setOpenDialog(false)}
+          />
+        </DialogTitle>
+        <Form {...formAddDevice}>
+          <form
+            onSubmit={formAddDevice.handleSubmit(onHandleSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={formAddDevice.control}
+              name="device_ids"
+              render={({ field: { ...field } }) => (
+                <FormItem className="mb-5">
+                  <FormLabel>Devices</FormLabel>
+                  <MultiSelect
+                    selected={field.value.map(String)}
+                    options={deviceIds}
+                    {...field}
+                  />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={formAddDevice.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={formAddDevice.control}
+              name="room_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Room Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              className="p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark flex items-center justify-items-center w-full"
+            >
+              Add device
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }
