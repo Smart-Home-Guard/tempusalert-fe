@@ -20,6 +20,7 @@ import { components } from "@/types/openapi-spec";
 import { apiClient } from "@/lib/apiClient";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
+import { useIsNavBarCollapsed } from "@/store";
 
 type NotificationStatus = "SAFE" | "DANGEROUS" | "IDLE";
 const LightKindList = [56];
@@ -29,6 +30,8 @@ export default function HomePage() {
   const [userRoomData, setUserRoomData] = useState<
     components["schemas"]["ResponseRoom"][]
   >([]);
+
+  const { isNavBarCollapsed } = useIsNavBarCollapsed();
 
   const Header = () => {
     const buzzerList: { componentId: number; deviceId: number }[] = [];
@@ -451,7 +454,13 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-8">
       <Header />
-      <div className="pl-24 flex flex-row gap-8 overflow-x-auto">
+      <div
+        className={`pl-24 pr-24  max-w-[${
+          isNavBarCollapsed ? 1850 : 1630
+        }px] w-[${
+          isNavBarCollapsed ? 1850 : 1630
+        }px] flex flex-row gap-8 overflow-auto`}
+      >
         {userRoomData.map(({ name, devices }) =>
           devices.map(({ id, components }) => (
             <RoomStatusInformation

@@ -15,8 +15,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useEmailStore, useJwtStore, useLoggedInStore } from "@/store";
-import { TooltipContent, TooltipPortal, TooltipProvider, TooltipTrigger } from "@radix-ui/react-tooltip";
+import {
+  useEmailStore,
+  useIsNavBarCollapsed,
+  useJwtStore,
+  useLoggedInStore,
+} from "@/store";
+import {
+  TooltipContent,
+  TooltipPortal,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@radix-ui/react-tooltip";
 import { Tooltip } from "@/components/ui/tooltip";
 
 export function NavigationTab({
@@ -117,17 +127,31 @@ export function AvatarPane({ className = "" }: { className?: string }) {
 export function NavigationBar() {
   const [isHoverSidebar, setIsHoverSidebar] = useState<boolean>(false);
   const [hoverTimeout, setHoverTimeout] = useState<any>(undefined);
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const {
+    isNavBarCollapsed: isCollapsed,
+    setIsNavBarCollapsed: setIsCollapsed,
+  } = useIsNavBarCollapsed();
 
   return (
     <div
       className="min-h-screen p-0 m-0"
-      onMouseEnter={() => { hoverTimeout && clearTimeout(hoverTimeout); setIsHoverSidebar(true); }}
-      onMouseLeave={() => setHoverTimeout(setTimeout(() => setIsHoverSidebar(false), 500))}
+      onMouseEnter={() => {
+        hoverTimeout && clearTimeout(hoverTimeout);
+        setIsHoverSidebar(true);
+      }}
+      onMouseLeave={() =>
+        setHoverTimeout(setTimeout(() => setIsHoverSidebar(false), 500))
+      }
     >
-      <div className={`w-${isCollapsed ? "[0]" :"[220px]"} transform transition-all duration-300 ease-in-out`} />
+      <div
+        className={`w-${
+          isCollapsed ? "[0]" : "[220px]"
+        } transform transition-all duration-300 ease-in-out`}
+      />
       <nav
-        className={`h-full bg-primary-slightly-dark text-neutral-very-light w-[220px] shadow-xl shadow-primary-slightly-light fixed transform transition duration-300 ease-in-out ${isCollapsed ? "-translate-x-full" : ""}`}
+        className={`h-full bg-primary-slightly-dark text-neutral-very-light w-[220px] shadow-xl shadow-primary-slightly-light fixed transform transition duration-300 ease-in-out ${
+          isCollapsed ? "-translate-x-full" : ""
+        }`}
       >
         <div className="bg-primary p-16 shadow-md">
           <Link
@@ -147,22 +171,24 @@ export function NavigationBar() {
         <div className="flex flex-col h-full">
           <AvatarPane />
           <NavigationPane />
-        </div> 
-          <div className={`transition-opacity duration-100 opacity-${isHoverSidebar || isCollapsed ? "100" : "0"}`}>
-            <div
-              className="fixed top-1/2 left-[220px] border-l-primary-dark border-l-[8px] border-t-[transparent] border-t-[10px] border-b-[transparent] border-b-[10px] w-[0] h-64 bg-[transparent] z-40 rounded-none"
-            />
-            <button
-              className="fixed top-1/2 left-[218px] w-[8px] h-64 bg-[transparent] z-40 rounded-none text-neutral-light"
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              {
-                isCollapsed ?
-                <ChevronRight className="w-12"/> :
-                <ChevronLeft className="w-12"/>
-              }
-            </button>
-          </div>
+        </div>
+        <div
+          className={`transition-opacity duration-100 opacity-${
+            isHoverSidebar || isCollapsed ? "100" : "0"
+          }`}
+        >
+          <div className="fixed top-1/2 left-[220px] border-l-primary-dark border-l-[8px] border-t-[transparent] border-t-[10px] border-b-[transparent] border-b-[10px] w-[0] h-64 bg-[transparent] z-40 rounded-none" />
+          <button
+            className="fixed top-1/2 left-[218px] w-[8px] h-64 bg-[transparent] z-40 rounded-none text-neutral-light"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            {isCollapsed ? (
+              <ChevronRight className="w-12" />
+            ) : (
+              <ChevronLeft className="w-12" />
+            )}
+          </button>
+        </div>
       </nav>
     </div>
   );
