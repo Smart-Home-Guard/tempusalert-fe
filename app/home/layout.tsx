@@ -6,7 +6,13 @@ import { NavigationBar } from "./navbar";
 import { redirect, usePathname } from "next/navigation";
 import { Fragment, useEffect, useTransition } from "react";
 import { useLoggedInStore } from "@/store";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { FlameIcon, HomeIcon } from "lucide-react";
 
 export default function HomeLayout({
@@ -38,7 +44,11 @@ function AppBreadcrumb() {
   const pathname = usePathname();
   const pathComponents = pathname.split("/").slice(1);
 
-  const itemMap: { [index: string]: Record<"href", string> & Record<"icon", typeof HomeIcon> & Record<"name", string> } = {
+  const itemMap: {
+    [index: string]: Record<"href", string> &
+      Record<"icon", typeof HomeIcon> &
+      Record<"name", string>;
+  } = {
     home: {
       icon: HomeIcon,
       href: "/home/",
@@ -54,26 +64,24 @@ function AppBreadcrumb() {
   return (
     <Breadcrumb className="mb-8">
       <BreadcrumbList>
-        {
-          pathComponents.map((p) => {
-            const Icon = itemMap[p].icon;
-            const href = itemMap[p].href;
-            const name = itemMap[p].name;
+        {pathComponents.map((p) => {
+          const Icon = itemMap[p].icon;
+          const href = itemMap[p].href;
+          const name = itemMap[p].name;
 
-            return (
-              <Fragment key={p}>
-                <BreadcrumbItem className="flex items-center">
-                  <Icon size={18} />
-                  <BreadcrumbLink href={href}>{name}</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator>
-                  <p className="text-neutral">/</p>
-                </BreadcrumbSeparator>
-              </Fragment>
-            )
-          })
-        }
+          return (
+            <Fragment key={p}>
+              <BreadcrumbItem className="flex items-center">
+                <Icon size={18} />
+                <BreadcrumbLink href={href}>{name}</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator>
+                <p className="text-neutral">/</p>
+              </BreadcrumbSeparator>
+            </Fragment>
+          );
+        })}
       </BreadcrumbList>
     </Breadcrumb>
-  )
+  );
 }

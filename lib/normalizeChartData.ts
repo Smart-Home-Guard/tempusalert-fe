@@ -3,6 +3,7 @@ export type ChartData<T extends string> = {
     timestamp: TimestampType;
     value: number;
     component: number;
+    id: number;
     [key: string]: string | number | TimestampType;
   }[];
 };
@@ -14,6 +15,7 @@ export type MetricChartData = {
 } & ChartLineData;
 
 type ChartLineData = {
+  deviceId: number;
   timestamp: number[];
   value: number[];
 };
@@ -25,7 +27,7 @@ export function normalizeChartData(
   const metricChartData: Record<string, ChartLineData> = {};
 
   Object.values(data).forEach((categoryData) => {
-    categoryData.forEach(({ timestamp, value, component }) => {
+    categoryData.forEach(({ timestamp, value, component, id }) => {
       const roomName =
         componentRoomMap.get(component) || `Unknown room ${component}`;
       const millis =
@@ -33,11 +35,12 @@ export function normalizeChartData(
         Math.floor(timestamp.nanos_since_epoch / 1e6);
 
       if (!metricChartData[roomName]) {
-        metricChartData[roomName] = { timestamp: [], value: [] };
+        metricChartData[roomName] = { timestamp: [], value: [], deviceId: 0 };
       }
 
       metricChartData[roomName].timestamp.push(millis);
       metricChartData[roomName].value.push(value);
+      metricChartData[roomName].deviceId = id;
     });
   });
 
@@ -47,8 +50,7 @@ export function normalizeChartData(
 
   const res: MetricChartData[] = Object.entries(metricChartData).map(
     ([roomName, chartData]) => ({
-      timestamp: chartData.timestamp,
-      value: chartData.value,
+      ...chartData,
       roomName: roomName,
     })
   );

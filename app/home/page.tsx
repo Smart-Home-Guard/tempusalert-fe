@@ -44,6 +44,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MultiSelect, OptionType } from "@/components/ui/multiselect";
+import { RoomChart as RoomHistoryChart } from "./roomChart";
 
 const MetricHistoryChart = dynamic(() => import("./metricLineChart"), {
   ssr: false,
@@ -170,6 +171,108 @@ function RoomStatusSection({
   const { toast } = useToast();
 
   const [openDialog, setOpenDialog] = useState<boolean>(false);
+
+  function RoomChart({ roomName }: { roomName: string }) {
+    const [metricType, setMetricType] = useState<MetricType>("co");
+
+    const metricTypeMap: Record<
+      MetricType,
+      {
+        title: string;
+
+        subtitle: string;
+      }
+    > = {
+      co: {
+        title: "CO concentration",
+
+        subtitle: "By ppm",
+      },
+
+      flame: {
+        title: "Heat",
+
+        subtitle: "By °C",
+      },
+
+      gas: {
+        title: "Gas concentration",
+
+        subtitle: "By ppm",
+      },
+
+      smoke: {
+        title: "Smoke concentration",
+
+        subtitle: "By ppm",
+      },
+    };
+
+    return (
+      <Card className="w-full bg-[#FFFFFF] border-none drop-shadow-md">
+        <CardContent className="justify-center items-start p-16">
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild className="p-16 bg-neutral-dark">
+              <Button
+                variant="outline"
+                className="text-neutral-very-light flex items-center justify-between"
+              >
+                <p>Open</p>
+
+                <ChevronDownIcon size={18} color="white" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuPortal>
+              <DropdownMenuContent className="w-full z-50 bg-neutral-slightly-light shadow-lg p-4 text-left rounded-lg">
+                <DropdownMenuRadioGroup
+                  value={metricType}
+                  onValueChange={setMetricType as any}
+                >
+                  <DropdownMenuRadioItem
+                    value="co"
+                    className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                  >
+                    CO Concentration
+                  </DropdownMenuRadioItem>
+
+                  <DropdownMenuRadioItem
+                    value="smoke"
+                    className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                  >
+                    Smoke
+                  </DropdownMenuRadioItem>
+
+                  <DropdownMenuRadioItem
+                    value="flame"
+                    className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                  >
+                    Flame
+                  </DropdownMenuRadioItem>
+
+                  <DropdownMenuRadioItem
+                    value="gas"
+                    className="hover:bg-primary hover:text-neutral-light rounded-lg p-4"
+                  >
+                    Gas Leak
+                  </DropdownMenuRadioItem>
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenuPortal>
+          </DropdownMenu>
+
+          <div className="p-16 col-span-3">
+            <RoomHistoryChart
+              roomName={roomName}
+              data={{}}
+              {...metricTypeMap[metricType]}
+              metricType={metricType}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   async function onSubmit(newRoom: z.infer<typeof formSchema>) {
     const res = await apiClient.POST("/api/rooms/", {
@@ -339,6 +442,7 @@ function RoomStatusSection({
                   </div>
                 ))}
               </div>
+              <RoomChart roomName={room.name} />
             </DialogContent>
           </Dialog>
         ))}
