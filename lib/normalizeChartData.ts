@@ -55,7 +55,7 @@ export function normalizeChartData(
     })
   );
 
-  return res;
+  return res.filter(({ timestamp }) => timestamp.length > 1);
 }
 
 function quickSort(
