@@ -150,7 +150,10 @@ function RoomStatusSection({
 }) {
   const roomData = rooms.map((room) => ({
     ...room,
-    isSafe: room.components.every((component) => component.status === "SAFE"),
+    // 0 is SAFE
+    isSafe: room.components.every(
+      (component) => component.status === (0 as any)
+    ),
   }));
 
   const formSchema = z.object({

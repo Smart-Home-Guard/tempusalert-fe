@@ -25,6 +25,13 @@ const apiFireLogMap: Record<MetricType, apiFireLog> = {
   gas: "gas-logs",
 };
 
+const dangerThresholdsMap: Record<MetricType, number> = {
+  smoke: 700,
+  co: 100,
+  flame: 2.5,
+  gas: 3800,
+};
+
 export default function MetricLineChart<T extends string>({
   data: _data,
   title,
@@ -149,7 +156,7 @@ export default function MetricLineChart<T extends string>({
 
   useEffect(() => {
     if (data && data.length > 0) {
-      const dangerLevel: number = 350;
+      const DANGER_LEVEL = dangerThresholdsMap[metricType];
 
       const plotData: Plotly.Data[] = data.map(
         ({ roomName, timestamp, value }) => ({
@@ -163,7 +170,7 @@ export default function MetricLineChart<T extends string>({
 
       const dangerLevelBar = {
         x: data[0].timestamp,
-        y: new Array(data[0].timestamp.length).fill(dangerLevel),
+        y: new Array(data[0].timestamp.length).fill(DANGER_LEVEL),
         mode: "lines",
         name: "Danger Level",
         line: {
@@ -191,7 +198,7 @@ export default function MetricLineChart<T extends string>({
 
       Plotly.newPlot("fireMatrixChart", plotData, layout);
     }
-  }, [data]);
+  }, [data, metricType]);
 
   return (
     <div>
