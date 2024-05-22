@@ -705,19 +705,25 @@ function RoomStatusSection({
                 <DialogAddDevice roomName={room.name} />
               </DialogTitle>
 
-              <div className="grid grid-cols-3 max-h-96 overflow-auto">
-                {room.components
-                  .filter(({ status }) => status === MetricStatus.dangerous)
-                  .map(({ id, kind, deviceId }) => (
-                    <ComponentStatusCard
-                      key={`${kind}-${id}`}
-                      componentId={id}
-                      isIdle={false}
-                      componentKindId={kind}
-                      deviceId={deviceId}
-                    />
-                  ))}
-              </div>
+              {!room.components.some(
+                ({ status }) => status === MetricStatus.dangerous
+              ) ? (
+                <p>No dangerous were detected by the sensors</p>
+              ) : (
+                <div className="grid grid-cols-3 max-h-96 overflow-auto">
+                  {room.components
+                    .filter(({ status }) => status === MetricStatus.dangerous)
+                    .map(({ id, kind, deviceId }) => (
+                      <ComponentStatusCard
+                        key={`${kind}-${id}`}
+                        componentId={id}
+                        isIdle={false}
+                        componentKindId={kind}
+                        deviceId={deviceId}
+                      />
+                    ))}
+                </div>
+              )}
               <RoomChart roomName={room.name} />
             </DialogContent>
           </Dialog>

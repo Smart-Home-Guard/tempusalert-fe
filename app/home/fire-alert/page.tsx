@@ -355,10 +355,6 @@ export default function HomePage() {
         }
 
         if ((response.data as any)?.value.length == 0) {
-          toast({
-            title: "Device not found",
-            variant: "destructive",
-          });
           return;
         }
 
@@ -413,7 +409,10 @@ export default function HomePage() {
 
     return (
       <div className="flex flex-col gap-4">
-        <RoomNameHeader roomName={roomName} status={roomStatus} />
+        <RoomNameHeader
+          roomName={`${roomName}-${deviceId}`}
+          status={roomStatus}
+        />
         <div className="flex flex-col gap-2">
           {components.map(({ id, kind, logs }) => (
             <ComponentStatusCard
