@@ -156,9 +156,8 @@ export function RoomChart<T extends string>({
           //keep only selected room
 
           setData(
-            metricChartData.filter(
-              ({ roomName: dataRoomName }) =>
-                dataRoomName.toLowerCase() === roomName.toLowerCase()
+            metricChartData.filter(({ roomName: dataRoomName }) =>
+              dataRoomName.toLowerCase().includes(roomName.toLowerCase())
             )
           );
         }
@@ -175,8 +174,8 @@ export function RoomChart<T extends string>({
           //keep only selected room
 
           setData(
-            metricChartData.filter(
-              ({ roomName: dataRoomName }) => dataRoomName === roomName
+            metricChartData.filter(({ roomName: dataRoomName }) =>
+              dataRoomName.toLowerCase().includes(roomName.toLowerCase())
             )
           );
         }
@@ -193,8 +192,8 @@ export function RoomChart<T extends string>({
           //keep only selected room
 
           setData(
-            metricChartData.filter(
-              ({ roomName: dataRoomName }) => dataRoomName === roomName
+            metricChartData.filter(({ roomName: dataRoomName }) =>
+              dataRoomName.toLowerCase().includes(roomName.toLowerCase())
             )
           );
         }
@@ -211,8 +210,8 @@ export function RoomChart<T extends string>({
           //keep only selected room
 
           setData(
-            metricChartData.filter(
-              ({ roomName: dataRoomName }) => dataRoomName === roomName
+            metricChartData.filter(({ roomName: dataRoomName }) =>
+              dataRoomName.toLowerCase().includes(roomName.toLowerCase())
             )
           );
         }
@@ -313,7 +312,6 @@ export function RoomChart<T extends string>({
           />
         </div>
       </div>
-
       {data.length !== 0 ? (
         <PlotlyWrapper data={plotData} layout={layout} />
       ) : (
