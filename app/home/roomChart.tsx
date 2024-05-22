@@ -31,12 +31,16 @@ type apiFireLog = "smoke-logs" | "fire-logs" | "co-logs" | "gas-logs";
 
 const apiFireLogMap: Record<MetricType, apiFireLog> = {
   smoke: "smoke-logs",
-
   co: "co-logs",
-
   flame: "fire-logs",
-
   gas: "gas-logs",
+};
+
+const dangerThresholdsMap: Record<MetricType, number> = {
+  smoke: 700,
+  co: 100,
+  flame: 2.5,
+  gas: 3800,
 };
 
 export function RoomChart<T extends string>({
@@ -224,7 +228,7 @@ export function RoomChart<T extends string>({
   let layout;
 
   if (data && data.length > 0) {
-    const dangerLevel: number = 350;
+    const DANGER_LEVEL = dangerThresholdsMap[metricType];
 
     plotData = data.map(({ deviceId, timestamp, value }) => ({
       x: timestamp,
@@ -241,7 +245,7 @@ export function RoomChart<T extends string>({
     const dangerLevelBar = {
       x: data[0].timestamp,
 
-      y: new Array(data[0].timestamp.length).fill(dangerLevel),
+      y: new Array(data[0].timestamp.length).fill(DANGER_LEVEL),
 
       mode: "lines",
 
