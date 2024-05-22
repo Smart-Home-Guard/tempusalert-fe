@@ -737,6 +737,9 @@ function RoomStatusSection({
                 </div>
               )}
               <RoomChart roomName={room.name} />
+              <div className="flex w-fit">
+                <DialogRemoveRoom roomName={room.name} />
+              </div>
             </DialogContent>
           </Dialog>
         ))}
@@ -1216,6 +1219,84 @@ function DialogRemoveDevice({ roomName }: { roomName: string }) {
             </Button>
           </form>
         </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DialogRemoveRoom({ roomName }: { roomName: string }) {
+  const { toast } = useToast();
+  const { email } = useEmailStore();
+  const { jwt } = useJwtStore();
+
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
+  const deleteRoom = useCallback(async () => {
+    const res = await apiClient.DELETE("/api/rooms/", {
+      params: {
+        query: {
+          email: email,
+          room_name: roomName,
+        },
+      },
+      headers: {
+        jwt,
+      },
+    });
+
+    if (res.error) {
+      toast({
+        title: "Fetch device ids failed",
+        description: res.error.message,
+        variant: "destructive",
+      });
+      return [];
+    }
+  }, [email, jwt, roomName, toast]);
+
+  return (
+    <Dialog open={openDialog} onOpenChange={() => setOpenDialog(!openDialog)}>
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          className="flex w-full items-center gap-2 p-16 bg-danger text-neutral-very-light hover:bg-danger-slightly-dark"
+        >
+          <CircleMinusIcon size={18} color="white" />
+          Remove Room
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px] bg-[#FFFFFF] border-none shadow-md p-16">
+        <DialogTitle className="flex items-center justify-between">
+          <p className="text-24 mt-4 text-center">
+            Are you sure you want to delete the room{" "}
+            <span className="text-danger">{roomName}</span> ?
+          </p>
+          <XIcon
+            size={24}
+            color="black"
+            className="cursor-pointer p-4 hover:bg-neutral rounded-full"
+            onClick={() => setOpenDialog(false)}
+          />
+        </DialogTitle>
+        <div className="flex mt-8 justify-between">
+          <Button
+            variant="outline"
+            className="p-16 bg-neutral text-neutral-very-dark hover:bg-neutral-slightly-dark w-[150px]"
+            onClick={() => setOpenDialog(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="outline"
+            className="p-16 bg-danger text-neutral-very-light hover:bg-danger-slightly-dark w-[150px]"
+            onClick={() => {
+              deleteRoom();
+              window.location.reload();
+            }}
+          >
+            Delete
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
