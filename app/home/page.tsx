@@ -704,6 +704,12 @@ function RoomStatusSection({
                 </p>
                 <DialogAddDevice roomName={room.name} />
               </DialogTitle>
+              <div>
+                Device list:{" "}
+                {[...new Set(room.components.map(({ deviceId }) => deviceId))]
+                  .sort()
+                  .join(", ")}
+              </div>
 
               {!room.components.some(
                 ({ status }) => status === MetricStatus.dangerous
