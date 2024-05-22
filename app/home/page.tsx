@@ -15,6 +15,7 @@ import {
   BellRingIcon,
   ChevronDownIcon,
   CirclePlusIcon,
+  CircleMinusIcon,
   FlameIcon,
   LightbulbIcon,
   LightbulbOffIcon,
@@ -702,7 +703,10 @@ function RoomStatusSection({
                 <p className="text-36 font-bold  text-neutral-very-dark">
                   {room.name}
                 </p>
-                <DialogAddDevice roomName={room.name} />
+                <div className="flex flex-col gap-2">
+                  <DialogAddDevice roomName={room.name} />
+                  <DialogRemoveDevice roomName={room.name} />
+                </div>
               </DialogTitle>
               <div>
                 Device list:{" "}
@@ -961,7 +965,7 @@ function DialogAddDevice({ roomName }: { roomName: string }) {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="flex w-fit items-center gap-2 p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark"
+          className="flex w-full items-center gap-2 p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark"
         >
           <CirclePlusIcon size={18} color="white" />
           Add Device
@@ -1027,6 +1031,186 @@ function DialogAddDevice({ roomName }: { roomName: string }) {
               className="p-16 bg-primary text-neutral-very-light hover:bg-primary-slightly-dark flex items-center justify-items-center w-full"
             >
               Add device
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DialogRemoveDevice({ roomName }: { roomName: string }) {
+  const { toast } = useToast();
+  const { email } = useEmailStore();
+  const { jwt } = useJwtStore();
+
+  const [deviceIds, setDeviceIds] = useState<OptionType[]>([]);
+
+  const [openDialog, setOpenDialog] = useState<boolean>(false);
+
+  const formAddDeviceSchema = z.object({
+    device_ids: z
+      .array(z.custom<OptionType>())
+      .min(1, { message: "Please select at least one device." }),
+    email: z
+      .string()
+      .min(1, { message: "This field has to be filled." })
+      .email("This is not a valid email."),
+    room_name: z
+      .string()
+      .min(1, { message: "The room name must contain at least 1 character." }),
+  });
+
+  const fetchDeviceIds = useCallback(async () => {
+    const res = await apiClient.GET("/api/rooms/", {
+      params: {
+        query: {
+          email: email,
+          room_name: roomName,
+        },
+      },
+      headers: {
+        jwt,
+      },
+    });
+
+    if (res.error) {
+      toast({
+        title: "Fetch device ids failed",
+        description: res.error.message,
+        variant: "destructive",
+      });
+      return [];
+    }
+
+    const data = res.data.value as components["schemas"]["ResponseRoom"];
+
+    const deviceIds: OptionType[] =
+      data.devices.map((device) => ({
+        label: `Device ${device.id}`,
+        value: `${device.id}`,
+      })) ?? [];
+    setDeviceIds(deviceIds);
+  }, [email, jwt, roomName, toast]);
+  useEffect(() => {
+    fetchDeviceIds();
+  }, [fetchDeviceIds]);
+
+  const formAddDevice = useForm<z.infer<typeof formAddDeviceSchema>>({
+    resolver: zodResolver(formAddDeviceSchema),
+    defaultValues: {
+      device_ids: deviceIds,
+      email: email,
+      room_name: roomName,
+    },
+  });
+
+  const onHandleSubmit = async (data: z.infer<typeof formAddDeviceSchema>) => {
+    const res = await apiClient.DELETE("/api/rooms/devices", {
+      body: {
+        email: data.email,
+        room_name: data.room_name,
+        device_ids: data.device_ids.map((id) => Number(id)),
+      },
+      headers: {
+        jwt,
+      },
+    });
+
+    if (res.error) {
+      toast({
+        title: "Remove device failed",
+        description: res.error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Remove device success",
+      description: "Device has been removed from the room",
+      variant: "safe",
+    });
+    setOpenDialog(false);
+  };
+
+  return (
+    <Dialog
+      open={openDialog}
+      onOpenChange={() => {
+        formAddDevice.reset();
+        setOpenDialog(!openDialog);
+      }}
+    >
+      <DialogTrigger asChild>
+        <Button
+          variant="outline"
+          className="flex w-full items-center gap-2 p-16 bg-danger text-neutral-very-light hover:bg-danger-slightly-dark"
+        >
+          <CircleMinusIcon size={18} color="white" />
+          Remove Device
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px] bg-[#FFFFFF] border-none shadow-md p-16">
+        <DialogTitle className="flex items-center justify-between">
+          <p className="text-20 font-bold text-neutral-very-dark">Add Device</p>
+          <XIcon
+            size={24}
+            color="black"
+            className="cursor-pointer p-4 hover:bg-neutral rounded-full"
+            onClick={() => setOpenDialog(false)}
+          />
+        </DialogTitle>
+        <Form {...formAddDevice}>
+          <form
+            onSubmit={formAddDevice.handleSubmit(onHandleSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={formAddDevice.control}
+              name="device_ids"
+              render={({ field: { ...field } }) => (
+                <FormItem className="mb-5">
+                  <FormLabel>Devices</FormLabel>
+                  <MultiSelect
+                    selected={field.value.map(String)}
+                    options={deviceIds}
+                    {...field}
+                  />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={formAddDevice.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={formAddDevice.control}
+              name="room_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Room Name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button
+              type="submit"
+              className="p-16 bg-danger text-neutral-very-light hover:bg-danger-slightly-dark flex items-center justify-items-center w-full"
+            >
+              Remove device
             </Button>
           </form>
         </Form>
