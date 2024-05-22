@@ -188,7 +188,9 @@ function RoomStatusSection({
   const roomData = rooms.map((room) => ({
     ...room,
     isSafe: room.components.every(
-      (component) => component.status === MetricStatus.safe
+      (component) =>
+        component.status === MetricStatus.safe ||
+        component.status === MetricStatus.idle
     ),
   }));
 
