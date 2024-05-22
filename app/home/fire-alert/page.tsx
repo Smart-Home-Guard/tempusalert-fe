@@ -355,10 +355,6 @@ export default function HomePage() {
         }
 
         if ((response.data as any)?.value.length == 0) {
-          toast({
-            title: "Device not found",
-            variant: "destructive",
-          });
           return;
         }
 
