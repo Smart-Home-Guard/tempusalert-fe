@@ -4,7 +4,10 @@ import React, { BaseSyntheticEvent, useEffect, useState } from "react";
 
 import { addDays, endOfDay, format, startOfDay, subDays } from "date-fns";
 
-import * as Plotly from "plotly.js-dist-min";
+import dynamic from "next/dynamic";
+const PlotlyWrapper = dynamic(() => import("@/components/ui/plotlyChart"), {
+  ssr: false,
+});
 
 import {
   ChartData,
@@ -217,67 +220,62 @@ export function RoomChart<T extends string>({
     fetchData();
   }, [currentDate, email, jwt, metricType, roomName]);
 
-  useEffect(() => {
-    console.log(data);
+  let plotData: Plotly.Data[] = [];
+  let layout;
 
-    if (data && data.length > 0) {
-      const dangerLevel: number = 350;
+  if (data && data.length > 0) {
+    const dangerLevel: number = 350;
 
-      const plotData: Plotly.Data[] = data.map(
-        ({ deviceId, timestamp, value }) => ({
-          x: timestamp,
+    plotData = data.map(({ deviceId, timestamp, value }) => ({
+      x: timestamp,
 
-          y: value,
+      y: value,
 
-          name: `device ${deviceId}`,
+      name: `device ${deviceId}`,
 
-          mode: "lines",
+      mode: "lines",
 
-          line: { shape: "spline" },
-        })
-      );
+      line: { shape: "spline" },
+    }));
 
-      const dangerLevelBar = {
-        x: data[0].timestamp,
+    const dangerLevelBar = {
+      x: data[0].timestamp,
 
-        y: new Array(data[0].timestamp.length).fill(dangerLevel),
+      y: new Array(data[0].timestamp.length).fill(dangerLevel),
 
-        mode: "lines",
+      mode: "lines",
 
-        name: "Danger Level",
+      name: "Danger Level",
 
-        line: {
-          dash: "dash",
+      line: {
+        dash: "dash",
 
-          color: "red",
-        },
-      };
+        color: "red",
+      },
+    };
 
-      plotData.push(dangerLevelBar);
+    plotData.push(dangerLevelBar);
 
-      const { tickvals, ticktext } = generateTimeTicks(data, 8);
+    const { tickvals, ticktext } = generateTimeTicks(data, 8);
 
-      const layout = {
-        // title: "Fire Alert Data for One Day",
+    layout = {
+      // title: "Fire Alert Data for One Day",
 
-        xaxis: {
-          title: "Time",
+      xaxis: {
+        title: "Time",
 
-          tickformat: ",d",
+        tickformat: ",d",
 
-          tickvals,
+        tickvals,
 
-          ticktext,
-        },
+        ticktext,
+      },
 
-        yaxis: {
-          title: "Fire Alert Level",
-        },
-      };
-
-      Plotly.newPlot("fireMatrixChart", plotData, layout);
-    }
-  }, [data]);
+      yaxis: {
+        title: "Fire Alert Level",
+      },
+    };
+  }
 
   return (
     <div>
@@ -313,7 +311,7 @@ export function RoomChart<T extends string>({
       </div>
 
       {data.length !== 0 ? (
-        <div id="fireMatrixChart" className="plotly-chart"></div>
+        <PlotlyWrapper data={plotData} layout={layout} />
       ) : (
         <div className="w-full flex justify-center items-center">
           {"There's no data to show"}
