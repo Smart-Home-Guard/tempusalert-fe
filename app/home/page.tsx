@@ -12,12 +12,23 @@ import {
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
 import {
+  BellRingIcon,
   ChevronDownIcon,
   CirclePlusIcon,
+  FlameIcon,
+  LightbulbIcon,
+  LightbulbOffIcon,
   ShieldCheckIcon,
+  SirenIcon,
+  SprayCanIcon,
+  ThermometerIcon,
+  ToggleLeftIcon,
   Volume2Icon,
+  VolumeXIcon,
+  WindIcon,
   XIcon,
 } from "lucide-react";
+
 import _ from "lodash";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -45,6 +56,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MultiSelect, OptionType } from "@/components/ui/multiselect";
 import { RoomChart as RoomHistoryChart } from "./roomChart";
+import { components } from "@/types/openapi-spec";
+import { capitalizeFirstLetterAndLowercaseRest } from "@/lib/capitalizeFirstLetterAndLowercaseRest";
+import { NotificationStatus } from "./fire-alert/page";
 
 const MetricHistoryChart = dynamic(() => import("./metricLineChart"), {
   ssr: false,
@@ -52,11 +66,19 @@ const MetricHistoryChart = dynamic(() => import("./metricLineChart"), {
 
 export type MetricType = "co" | "smoke" | "flame" | "gas";
 
+enum MetricStatus {
+  safe,
+  dangerous,
+  idle,
+}
+
 type RoomStatus = {
   name: string;
   components: {
     id: number;
-    status: string;
+    kind: number;
+    status: number;
+    deviceId: number;
   }[];
 };
 
@@ -68,11 +90,10 @@ export default function HomePage() {
   const { jwt } = useJwtStore();
 
   const fetchRoomStatus = useCallback(async () => {
-    const roomNamesRes = await apiClient.GET("/api/rooms/", {
+    const roomsDataRes = await apiClient.GET("/api/rooms/", {
       params: {
         query: {
           email,
-          name_only: "",
         },
       },
       headers: {
@@ -80,19 +101,20 @@ export default function HomePage() {
       },
     });
 
-    if (roomNamesRes.error) {
+    if (roomsDataRes.error) {
       toast({
         title: "Fetch room names failed",
-        description: roomNamesRes.error.message,
+        description: roomsDataRes.error.message,
         variant: "destructive",
       });
       return;
     }
 
-    const roomNames = roomNamesRes.data.value as string[];
+    const roomsData = roomsDataRes.data
+      .value as components["schemas"]["ResponseRoom"][];
 
     const roomStatusRes = await Promise.all(
-      roomNames.map((name) =>
+      roomsData.map(({ name }) =>
         apiClient.GET("/api/fire-alert/status", {
           params: {
             query: {
@@ -106,7 +128,6 @@ export default function HomePage() {
         })
       )
     );
-
     const err = roomStatusRes.find((res) => res.error);
     if (err) {
       toast({
@@ -117,16 +138,31 @@ export default function HomePage() {
       return;
     }
 
-    const roomStatuses = roomStatusRes.map(
-      (res) => (res.data as any).component_statuses
-    );
+    const componentsStatuses: Map<number, number> = new Map<number, number>();
 
-    setRooms(
-      _.zipWith(roomNames, roomStatuses, (name, statuses) => ({
-        name,
-        components: statuses,
-      }))
-    );
+    roomStatusRes.forEach((res) => {
+      const componentStatuses = (res.data as any)
+        .component_statuses as components["schemas"]["ComponentSafetyStatus"][];
+      componentStatuses.forEach(({ id, status }) => {
+        componentsStatuses.set(id, Number(status));
+      });
+    });
+
+    const updatedRoomsData = roomsData.map(({ name, devices }) => ({
+      name,
+      components: devices
+        .map(({ id: deviceId, components }) =>
+          components.map(({ id, kind }) => ({
+            id,
+            deviceId,
+            kind: Number(kind),
+            status: componentsStatuses.get(id) || MetricStatus.idle,
+          }))
+        )
+        .flat(),
+    }));
+
+    setRooms(updatedRoomsData);
   }, [email, jwt, toast]);
 
   useEffect(() => {
@@ -150,9 +186,8 @@ function RoomStatusSection({
 }) {
   const roomData = rooms.map((room) => ({
     ...room,
-    // 0 is SAFE
     isSafe: room.components.every(
-      (component) => component.status === (0 as any)
+      (component) => component.status === MetricStatus.safe
     ),
   }));
 
@@ -307,6 +342,244 @@ function RoomStatusSection({
     setOpenDialog(false);
   }
 
+  const ComponentStatusCard: React.FC<{
+    componentId: number;
+    deviceId: number;
+    componentKindId: number;
+    isIdle: Boolean;
+  }> = ({ componentId, deviceId, componentKindId, isIdle }) => {
+    const componentKindNameMap: Map<
+      number,
+      components["schemas"]["ComponentType"]
+    > = new Map([
+      [50, "Smoke"],
+      [51, "Heat"],
+      [52, "CO"],
+      [53, "LPG"],
+      [54, "Fire"],
+      [55, "FireButton"],
+      [56, "FireLight"],
+      [57, "FireBuzzer"],
+    ]);
+    const LightKindList = [56];
+    const BuzzerKindList = [57];
+    const componentName = componentKindNameMap.get(componentKindId)!;
+
+    const [componentStatus, setComponentStatus] =
+      useState<NotificationStatus>("IDLE");
+
+    const ComponentIcon: React.FC<{
+      componentName: components["schemas"]["ComponentType"];
+    }> = ({ componentName }) => {
+      switch (componentName) {
+        case "Fire":
+          return <FlameIcon size={48} />;
+        case "FireButton":
+          return <ToggleLeftIcon size={48} />;
+        case "LPG":
+          return <SprayCanIcon size={48} />;
+        case "Heat":
+          return <ThermometerIcon size={48} />;
+        case "Smoke":
+          return <WindIcon size={48} />;
+        case "FireBuzzer":
+          return <BellRingIcon size={48} />;
+        case "FireLight":
+          return <SirenIcon size={48} />;
+        case "CO":
+          return <WindIcon size={48} />;
+        case "GeneralBuzzer":
+          return <BellRingIcon size={48} />;
+        case "GeneralLight":
+          return <SirenIcon size={48} />;
+      }
+    };
+
+    const ComponentStatusTag: React.FC<{
+      status: NotificationStatus;
+    }> = ({ status }) => {
+      let tagStyle = "";
+
+      switch (status) {
+        case "SAFE":
+          tagStyle = "bg-safe-very-light text-safe";
+          break;
+        case "DANGEROUS":
+          tagStyle = "bg-danger-very-light text-danger";
+          break;
+        case "IDLE":
+          tagStyle = "bg-warning-very-light text-warning";
+          break;
+      }
+
+      return (
+        <div
+          className={`h-fit w-fit leading-small-font py-4 px-8 rounded-2xl text-14 font-normal capitalize ${tagStyle}`}
+        >
+          {status}
+        </div>
+      );
+    };
+
+    const CommandIcons: React.FC<{
+      componentId: number;
+      componentKindId: number;
+      deviceId: number;
+    }> = ({ componentId, componentKindId, deviceId }) => {
+      const handleClick = async (
+        command: components["schemas"]["BuzzerCommand"]
+      ) => {
+        if (
+          !LightKindList.includes(componentKindId) &&
+          !BuzzerKindList.includes(componentKindId)
+        ) {
+          console.warn(`Invalid componentKindId: ${componentKindId}`);
+          return;
+        }
+
+        const type: "light" | "buzzer" = LightKindList.includes(componentKindId)
+          ? "light"
+          : "buzzer";
+
+        const response = await apiClient.POST(`/api/remote-control/${type}`, {
+          params: {
+            query: {
+              email: localStorage.getItem("email")?.slice(1, -1) || "",
+            },
+          },
+          body: {
+            command,
+            component_id: componentId,
+            device_id: deviceId,
+          },
+        });
+
+        if (response.error) {
+          toast({
+            title: "Send command to component fail",
+            description: response.error!.message,
+            variant: "destructive",
+          });
+          return;
+        }
+        if (response.data) {
+          toast({
+            title: "Send command to component success",
+            variant: "safe",
+          });
+          return;
+        }
+      };
+
+      const BuzzerIcons = () => {
+        return (
+          <div className="flex flex-col gap-2">
+            <Volume2Icon
+              className="hover:bg-neutral-slightly-light cursor-pointer border"
+              size={20}
+              onClick={() => handleClick("on")}
+            />
+            <VolumeXIcon
+              className="hover:bg-neutral-slightly-light cursor-pointer border"
+              size={20}
+              onClick={() => handleClick("off")}
+            />
+          </div>
+        );
+      };
+
+      const LightIcons = () => {
+        return (
+          <div className="flex flex-col gap-2">
+            <LightbulbIcon
+              className="hover:bg-neutral-slightly-light cursor-pointer border"
+              size={20}
+              onClick={() => handleClick("on")}
+            />
+            <LightbulbOffIcon
+              className="hover:bg-neutral-slightly-light cursor-pointer border"
+              size={20}
+              onClick={() => handleClick("off")}
+            />
+          </div>
+        );
+      };
+
+      if (LightKindList.includes(componentKindId)) return <LightIcons />;
+      if (BuzzerKindList.includes(componentKindId)) return <BuzzerIcons />;
+      return <div className="min-w-5"></div>;
+    };
+
+    const fetchComponentStatus = useCallback(async () => {
+      if (isIdle) {
+        setComponentStatus("IDLE");
+        return;
+      }
+
+      const response = await apiClient.GET("/api/fire-alert/status", {
+        params: {
+          query: {
+            email: localStorage.getItem("email")?.slice(1, -1) || "",
+            component_ids: `[${componentId}]`,
+          },
+        },
+      });
+
+      if (response.error) {
+        toast({
+          title: "Fetch device statuses failed",
+          description: response.error!.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if ((response.data as any)?.value.length == 0) {
+        toast({
+          title: "Device not found",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const componentStatusResult = (response.data as any)?.value[0].status;
+
+      if (componentStatusResult === 0 || componentStatusResult === 1) {
+        const componentStatus: NotificationStatus =
+          componentStatusResult === MetricStatus.safe ? "SAFE" : "DANGEROUS";
+
+        setComponentStatus(componentStatus);
+      } else setComponentStatus("IDLE");
+    }, [componentId, isIdle]);
+
+    useEffect(() => {
+      fetchComponentStatus();
+    }, [fetchComponentStatus]);
+
+    return (
+      <Card className="flex flex-row gap-4 justify-start items-center max-w-80 min-h-28 px-16 py-16 rounded-sm border-neutral-slightly-dark text-neutral-dark">
+        <div>
+          <ComponentIcon componentName={componentName} />
+        </div>
+        <div className="flex flex-col min-w-20">
+          <div className="flex flex-col gap-2">
+            <h5 className="text-20 font-semibold">
+              {capitalizeFirstLetterAndLowercaseRest(componentName)}
+            </h5>
+            {componentStatus === "DANGEROUS" && (
+              <ComponentStatusTag status={componentStatus} />
+            )}
+          </div>
+        </div>
+        <CommandIcons
+          componentKindId={componentKindId}
+          componentId={componentId}
+          deviceId={deviceId}
+        />
+      </Card>
+    );
+  };
+
   return (
     <Card className="w-full bg-[#FFFFFF] border-none shadow-md">
       <div className="p-16 flex flex-col">
@@ -424,26 +697,26 @@ function RoomStatusSection({
                 </CardContent>
               </Card>
             </DialogTrigger>
-            <DialogContent className="bg-[#FFFFFF] border-none shadow-md p-16">
-              <DialogTitle className="flex items-center justify-start text-20 font-bold text-neutral-very-dark">
-                {room.name}
+            <DialogContent className="bg-[#FFFFFF] border-none shadow-md p-32 overflow-auto w-[1300px] min-w-[1300px] flex flex-col gap-6">
+              <DialogTitle className="flex items-center justify-between">
+                <p className="text-36 font-bold  text-neutral-very-dark">
+                  {room.name}
+                </p>
+                <DialogAddDevice roomName={room.name} />
               </DialogTitle>
-              <DialogAddDevice roomName={room.name} />
-              <div className="grid grid-cols-2 gap-4">
-                {room.components.map((component) => (
-                  <div
-                    key={component.id}
-                    className={`${
-                      component.status === "SAFE"
-                        ? "bg-safe-slightly-dark"
-                        : "bg-danger-slightly-dark"
-                    } p-16 rounded-lg`}
-                  >
-                    <p className="text-14 font-bold text-neutral-very-light">
-                      {component.status}
-                    </p>
-                  </div>
-                ))}
+
+              <div className="grid grid-cols-3 max-h-96 overflow-auto">
+                {room.components
+                  .filter(({ status }) => status === MetricStatus.dangerous)
+                  .map(({ id, kind, deviceId }) => (
+                    <ComponentStatusCard
+                      key={`${kind}-${id}`}
+                      componentId={id}
+                      isIdle={false}
+                      componentKindId={kind}
+                      deviceId={deviceId}
+                    />
+                  ))}
               </div>
               <RoomChart roomName={room.name} />
             </DialogContent>
