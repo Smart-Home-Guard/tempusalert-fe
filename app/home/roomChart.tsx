@@ -40,7 +40,7 @@ const dangerThresholdsMap: Record<MetricType, number> = {
   smoke: 700,
   co: 100,
   flame: 2.5,
-  gas: 3800,
+  gas: 100,
 };
 
 export function RoomChart<T extends string>({
