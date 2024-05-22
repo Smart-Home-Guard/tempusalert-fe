@@ -22,7 +22,7 @@ import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
 import { useIsNavBarCollapsed } from "@/store";
 
-type NotificationStatus = "SAFE" | "DANGEROUS" | "IDLE";
+export type NotificationStatus = "SAFE" | "DANGEROUS" | "IDLE";
 const LightKindList = [56];
 const BuzzerKindList = [57];
 
